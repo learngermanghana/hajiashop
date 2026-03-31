@@ -20,7 +20,8 @@ const productImageUrls = {
     "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1200&q=80",
   hydratingLiquidFoundation:
     "https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=1200&q=80",
-  radianceSettingPowder: "/uploads/home/IMG_4436.JPG.jpeg",
+  radianceSettingPowder:
+    "https://images.pexels.com/photos/2732197/pexels-photo-2732197.jpeg?auto=compress&cs=tinysrgb&w=1200",
   volumizingMascara:
     "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1200&q=80",
   sunGlowBlushPalette:
@@ -30,7 +31,7 @@ const productImageUrls = {
   aloeMakeupRemover:
     "https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=1200&q=80",
   velvetNudeLipstick:
-    "https://images.unsplash.com/photo-1631214524020-57f7f0c5fc29?auto=format&fit=crop&w=1200&q=80",
+    "https://images.pexels.com/photos/34268886/pexels-photo-34268886.jpeg?auto=compress&cs=tinysrgb&w=1200",
   liquidEyelinerJetBlack:
     "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1200&q=80",
   overnightLipMask:
