@@ -20,8 +20,7 @@ const productImageUrls = {
     "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1200&q=80",
   hydratingLiquidFoundation:
     "https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=1200&q=80",
-  radianceSettingPowder:
-    "https://images.unsplash.com/photo-1583241800698-c8188cc6f0f8?auto=format&fit=crop&w=1200&q=80",
+  radianceSettingPowder: "/uploads/home/IMG_4436.JPG.jpeg",
   volumizingMascara:
     "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1200&q=80",
   sunGlowBlushPalette:
