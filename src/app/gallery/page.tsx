@@ -1,5 +1,5 @@
 import SectionTitle from "@/components/SectionTitle";
-import { getGalleryImages } from "@/lib/helpers";
+import { getGalleryImages } from "@/lib/gallery";
 
 export default function GalleryPage() {
   const images = getGalleryImages();
