@@ -1,14 +1,14 @@
 import Link from "next/link";
 import SectionTitle from "@/components/SectionTitle";
-
-const previewImages = [
-  "/uploads/gallery/look-1.jpg",
-  "/uploads/gallery/look-2.jpg",
-  "/uploads/gallery/look-3.jpg",
-  "/uploads/gallery/look-4.jpg"
-];
+import { getHomeImages } from "@/lib/home-images";
 
 export default function GalleryPreview() {
+  const homeImages = getHomeImages();
+  const previewImages =
+    homeImages.length > 0
+      ? homeImages.slice(0, 4)
+      : ["/uploads/gallery/look-1.jpg", "/uploads/gallery/look-2.jpg", "/uploads/gallery/look-3.jpg", "/uploads/gallery/look-4.jpg"];
+
   return (
     <section className="container-shell py-16">
       <SectionTitle eyebrow="Beauty Visuals" title="Gallery highlights" />
