@@ -15,6 +15,9 @@ export type Product = {
   tags?: string[];
 };
 
+const unsplashImage = (query: string) =>
+  `https://source.unsplash.com/1200x900/?${encodeURIComponent(query)}`;
+
 export const productCatalog: Record<string, Product> = {
   "matte-lip-gloss-red": {
     id: "p1",
@@ -24,8 +27,8 @@ export const productCatalog: Record<string, Product> = {
     category: "Lips",
     price: 45,
     currency: "GHS",
-    image: "/uploads/products/lipgloss-red.jpg",
-    gallery: ["/uploads/products/lipgloss-red.jpg"],
+    image: unsplashImage("matte red lip gloss makeup"),
+    gallery: [unsplashImage("matte red lip gloss makeup")],
     shortDescription: "Long-lasting matte lip gloss with rich color.",
     description:
       "A smooth matte lip gloss with bold color payoff for everyday wear and event-ready looks.",
@@ -41,8 +44,8 @@ export const productCatalog: Record<string, Product> = {
     category: "Face",
     price: 120,
     currency: "GHS",
-    image: "/uploads/products/foundation-hydrating.jpg",
-    gallery: ["/uploads/products/foundation-hydrating.jpg"],
+    image: unsplashImage("hydrating liquid foundation makeup"),
+    gallery: [unsplashImage("hydrating liquid foundation makeup")],
     shortDescription: "Buildable medium coverage with dewy finish.",
     description:
       "Lightweight foundation that blends effortlessly and keeps your skin fresh for up to 12 hours.",
@@ -58,7 +61,8 @@ export const productCatalog: Record<string, Product> = {
     category: "Face",
     price: 90,
     currency: "GHS",
-    image: "/uploads/products/setting-powder.jpg",
+    image: unsplashImage("radiance setting powder makeup"),
+    gallery: [unsplashImage("radiance setting powder makeup")],
     shortDescription: "Soft-focus finish that controls shine.",
     description: "Locks makeup in place and blurs pores without caking.",
     inStock: true,
@@ -73,7 +77,8 @@ export const productCatalog: Record<string, Product> = {
     category: "Eyes",
     price: 65,
     currency: "GHS",
-    image: "/uploads/products/mascara-volume.jpg",
+    image: unsplashImage("volumizing mascara product"),
+    gallery: [unsplashImage("volumizing mascara product")],
     shortDescription: "Intense black formula for fuller lashes.",
     description:
       "Smudge-resistant mascara that adds volume and length with every stroke.",
@@ -89,7 +94,8 @@ export const productCatalog: Record<string, Product> = {
     category: "Face",
     price: 85,
     currency: "GHS",
-    image: "/uploads/products/blush-palette.jpg",
+    image: unsplashImage("blush palette makeup"),
+    gallery: [unsplashImage("blush palette makeup")],
     shortDescription: "Three wearable shades for warm glow.",
     description: "Mix and match blush tones for soft daytime or bold glam looks.",
     inStock: true,
@@ -104,7 +110,8 @@ export const productCatalog: Record<string, Product> = {
     category: "Brows",
     price: 50,
     currency: "GHS",
-    image: "/uploads/products/brow-pencil.jpg",
+    image: unsplashImage("brow pencil makeup"),
+    gallery: [unsplashImage("brow pencil makeup")],
     shortDescription: "Precision brow pencil with spoolie brush.",
     description: "Define and fill your brows naturally with long-wear pigment.",
     inStock: true,
@@ -119,7 +126,8 @@ export const productCatalog: Record<string, Product> = {
     category: "Skincare",
     price: 70,
     currency: "GHS",
-    image: "/uploads/products/remover-aloe.jpg",
+    image: unsplashImage("aloe makeup remover skincare"),
+    gallery: [unsplashImage("aloe makeup remover skincare")],
     shortDescription: "Gentle cleansing remover for waterproof makeup.",
     description: "Bi-phase formula melts makeup while leaving skin soothed and hydrated.",
     inStock: true,
@@ -134,7 +142,8 @@ export const productCatalog: Record<string, Product> = {
     category: "Lips",
     price: 55,
     currency: "GHS",
-    image: "/uploads/products/lipstick-nude.jpg",
+    image: unsplashImage("velvet nude lipstick makeup"),
+    gallery: [unsplashImage("velvet nude lipstick makeup")],
     shortDescription: "Creamy nude lipstick for versatile looks.",
     description: "Comfort matte lipstick with rich pigment and all-day confidence.",
     inStock: true,
@@ -149,7 +158,8 @@ export const productCatalog: Record<string, Product> = {
     category: "Eyes",
     price: 48,
     currency: "GHS",
-    image: "/uploads/products/eyeliner-black.jpg",
+    image: unsplashImage("jet black liquid eyeliner makeup"),
+    gallery: [unsplashImage("jet black liquid eyeliner makeup")],
     shortDescription: "Quick-dry eyeliner with precise tip.",
     description: "Create sharp wings and defined eyes with water-resistant wear.",
     inStock: true,
@@ -164,7 +174,8 @@ export const productCatalog: Record<string, Product> = {
     category: "Lips",
     price: 60,
     currency: "GHS",
-    image: "/uploads/products/lip-mask.jpg",
+    image: unsplashImage("overnight lip mask skincare"),
+    gallery: [unsplashImage("overnight lip mask skincare")],
     shortDescription: "Nourishing lip mask for soft lips by morning.",
     description: "A restorative treatment infused with shea butter and vitamin E.",
     inStock: false,
