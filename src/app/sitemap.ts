@@ -3,16 +3,52 @@ import { products } from "@/data/products";
 import { siteConfig } from "@/data/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const routes = ["", "/about", "/shop", "/gallery", "/contact", "/faq"].map((route) => ({
-    url: `${siteConfig.baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const
-  }));
+  const lastModified = new Date();
 
-  const productRoutes = products.map((product) => ({
+  const routes: MetadataRoute.Sitemap = [
+    {
+      url: siteConfig.baseUrl,
+      lastModified,
+      changeFrequency: "daily",
+      priority: 1
+    },
+    {
+      url: `${siteConfig.baseUrl}/shop`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.9
+    },
+    {
+      url: `${siteConfig.baseUrl}/about`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8
+    },
+    {
+      url: `${siteConfig.baseUrl}/gallery`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.8
+    },
+    {
+      url: `${siteConfig.baseUrl}/faq`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7
+    },
+    {
+      url: `${siteConfig.baseUrl}/contact`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7
+    }
+  ];
+
+  const productRoutes: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${siteConfig.baseUrl}/shop/${product.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const
+    lastModified,
+    changeFrequency: "weekly",
+    priority: 0.85
   }));
 
   return [...routes, ...productRoutes];
