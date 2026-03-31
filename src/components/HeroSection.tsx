@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { getHomeImages } from "@/lib/home-images";
 import { siteConfig } from "@/data/site";
 
 export default function HeroSection() {
+  const [heroImage = "/uploads/home/hero-beauty.jpg"] = getHomeImages();
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-pink-50 via-white to-pink-100">
       <div className="container-shell grid gap-8 py-20 md:grid-cols-2 md:items-center">
@@ -29,7 +32,7 @@ export default function HeroSection() {
         </div>
         <div className="rounded-3xl border border-pink-100 bg-white p-3 shadow-lg">
           <img
-            src="/uploads/home/hero-beauty.jpg"
+            src={heroImage}
             alt="Beauty products display"
             className="h-[420px] w-full rounded-2xl object-cover"
           />
