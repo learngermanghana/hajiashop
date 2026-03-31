@@ -23,4 +23,6 @@ function getFirebaseAdminApp() {
   });
 }
 
-export const firestore = getFirestore(getFirebaseAdminApp());
+export function getFirestoreClient() {
+  return getFirestore(getFirebaseAdminApp());
+}

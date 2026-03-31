@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { firestore } from "@/lib/firebase-admin";
+import { getFirestoreClient } from "@/lib/firebase-admin";
 
 type InquiryPayload = {
   fullName?: string;
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
-    await firestore.collection("inquiries").add({
+    await getFirestoreClient().collection("inquiries").add({
       ...payload,
       createdAt: new Date().toISOString()
     });
