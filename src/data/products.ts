@@ -17,13 +17,13 @@ export type Product = {
 
 const productImageUrls = {
   happyHormones:
-    "https://images.unsplash.com/photo-1550572017-edd951b55104?auto=format&fit=crop&w=1200&q=80",
+    "https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg?auto=compress&cs=tinysrgb&w=1200",
   alphaArbutinCollagenPeptideDrink:
-    "https://images.unsplash.com/photo-1611241893603-3c359704e0ee?auto=format&fit=crop&w=1200&q=80",
+    "https://images.pexels.com/photos/3735218/pexels-photo-3735218.jpeg?auto=compress&cs=tinysrgb&w=1200",
   bloom:
-    "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=1200&q=80",
+    "https://images.pexels.com/photos/3873200/pexels-photo-3873200.jpeg?auto=compress&cs=tinysrgb&w=1200",
   neocellCollagen:
-    "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80"
+    "https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1200"
 } as const;
 
 export const productCatalog: Record<string, Product> = {
