@@ -16,191 +16,84 @@ export type Product = {
 };
 
 const productImageUrls = {
-  matteLipGlossRed:
-    "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1200&q=80",
-  hydratingLiquidFoundation:
-    "https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=1200&q=80",
-  radianceSettingPowder:
-    "https://images.pexels.com/photos/2732197/pexels-photo-2732197.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  volumizingMascara:
-    "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=1200&q=80",
-  sunGlowBlushPalette:
-    "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=1200&q=80",
-  browSculptPencil:
-    "https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=1200&q=80",
-  aloeMakeupRemover:
-    "https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=1200&q=80",
-  velvetNudeLipstick:
-    "https://images.pexels.com/photos/34268886/pexels-photo-34268886.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  liquidEyelinerJetBlack:
-    "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1200&q=80",
-  overnightLipMask:
-    "https://images.unsplash.com/photo-1571781418606-70265b9cce90?auto=format&fit=crop&w=1200&q=80"
+  happyHormones:
+    "https://images.unsplash.com/photo-1550572017-edd951b55104?auto=format&fit=crop&w=1200&q=80",
+  alphaArbutinCollagenPeptideDrink:
+    "https://images.unsplash.com/photo-1611241893603-3c359704e0ee?auto=format&fit=crop&w=1200&q=80",
+  bloom:
+    "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=1200&q=80",
+  neocellCollagen:
+    "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80"
 } as const;
 
 export const productCatalog: Record<string, Product> = {
-  "matte-lip-gloss-red": {
+  "happy-hormones": {
     id: "p1",
-    slug: "matte-lip-gloss-red",
-    name: "Matte Lip Gloss Red",
-    type: "Lip Gloss",
-    category: "Lips",
-    price: 45,
+    slug: "happy-hormones",
+    name: "Happy Hormones",
+    type: "Supplement",
+    category: "Wellness",
+    price: 200,
     currency: "GHS",
-    image: productImageUrls.matteLipGlossRed,
-    gallery: [productImageUrls.matteLipGlossRed],
-    shortDescription: "Long-lasting matte lip gloss with rich color.",
+    image: productImageUrls.happyHormones,
+    gallery: [productImageUrls.happyHormones],
+    shortDescription: "Hormone-support supplement for mood and balance.",
     description:
-      "A smooth matte lip gloss with bold color payoff for everyday wear and event-ready looks.",
+      "A daily wellness supplement formulated to support hormone balance and overall well-being.",
     inStock: true,
     featured: true,
-    tags: ["matte", "lip", "beauty"]
+    tags: ["wellness", "hormones", "supplement"]
   },
-  "hydrating-liquid-foundation": {
+  "7d-alpha-arbutin-collagen-peptide-drink": {
     id: "p2",
-    slug: "hydrating-liquid-foundation",
-    name: "Hydrating Liquid Foundation",
-    type: "Foundation",
-    category: "Face",
-    price: 120,
+    slug: "7d-alpha-arbutin-collagen-peptide-drink",
+    name: "7 D Alpha Arbutin Collagen Peptide Drink",
+    type: "Collagen Drink",
+    category: "Wellness",
+    price: 200,
     currency: "GHS",
-    image: productImageUrls.hydratingLiquidFoundation,
-    gallery: [productImageUrls.hydratingLiquidFoundation],
-    shortDescription: "Buildable medium coverage with dewy finish.",
+    image: productImageUrls.alphaArbutinCollagenPeptideDrink,
+    gallery: [productImageUrls.alphaArbutinCollagenPeptideDrink],
+    shortDescription: "Collagen peptide drink with alpha arbutin blend.",
     description:
-      "Lightweight foundation that blends effortlessly and keeps your skin fresh for up to 12 hours.",
+      "A beauty and wellness drink designed to support skin radiance with collagen peptides and alpha arbutin.",
     inStock: true,
     featured: true,
-    tags: ["foundation", "dewy", "face"]
+    tags: ["collagen", "drink", "arbutin"]
   },
-  "radiance-setting-powder": {
+  bloom: {
     id: "p3",
-    slug: "radiance-setting-powder",
-    name: "Radiance Setting Powder",
-    type: "Setting Powder",
-    category: "Face",
-    price: 90,
+    slug: "bloom",
+    name: "Bloom",
+    type: "Supplement",
+    category: "Wellness",
+    price: 350,
     currency: "GHS",
-    image: productImageUrls.radianceSettingPowder,
-    gallery: [productImageUrls.radianceSettingPowder],
-    shortDescription: "Soft-focus finish that controls shine.",
-    description: "Locks makeup in place and blurs pores without caking.",
-    inStock: true,
-    featured: true,
-    tags: ["powder", "setting", "oil-control"]
-  },
-  "volumizing-mascara": {
-    id: "p4",
-    slug: "volumizing-mascara",
-    name: "Volumizing Mascara",
-    type: "Mascara",
-    category: "Eyes",
-    price: 65,
-    currency: "GHS",
-    image: productImageUrls.volumizingMascara,
-    gallery: [productImageUrls.volumizingMascara],
-    shortDescription: "Intense black formula for fuller lashes.",
+    image: productImageUrls.bloom,
+    gallery: [productImageUrls.bloom],
+    shortDescription: "Daily wellness supplement for inner glow.",
     description:
-      "Smudge-resistant mascara that adds volume and length with every stroke.",
+      "Bloom is a daily supplement crafted to support nutrition, vitality, and healthy skin from within.",
     inStock: true,
     featured: false,
-    tags: ["lashes", "eyes", "volume"]
+    tags: ["daily", "wellness", "nutrition"]
   },
-  "sun-glow-blush-palette": {
-    id: "p5",
-    slug: "sun-glow-blush-palette",
-    name: "Sun Glow Blush Palette",
-    type: "Blush",
-    category: "Face",
-    price: 85,
+  "neocell-collagen": {
+    id: "p4",
+    slug: "neocell-collagen",
+    name: "Neocell Collagen",
+    type: "Collagen Supplement",
+    category: "Wellness",
+    price: 400,
     currency: "GHS",
-    image: productImageUrls.sunGlowBlushPalette,
-    gallery: [productImageUrls.sunGlowBlushPalette],
-    shortDescription: "Three wearable shades for warm glow.",
-    description: "Mix and match blush tones for soft daytime or bold glam looks.",
-    inStock: true,
-    featured: false,
-    tags: ["blush", "palette", "glow"]
-  },
-  "brow-sculpt-pencil": {
-    id: "p6",
-    slug: "brow-sculpt-pencil",
-    name: "Brow Sculpt Pencil",
-    type: "Brow Pencil",
-    category: "Brows",
-    price: 50,
-    currency: "GHS",
-    image: productImageUrls.browSculptPencil,
-    gallery: [productImageUrls.browSculptPencil],
-    shortDescription: "Precision brow pencil with spoolie brush.",
-    description: "Define and fill your brows naturally with long-wear pigment.",
-    inStock: true,
-    featured: false,
-    tags: ["brow", "precision"]
-  },
-  "aloe-makeup-remover": {
-    id: "p7",
-    slug: "aloe-makeup-remover",
-    name: "Aloe Makeup Remover",
-    type: "Skincare",
-    category: "Skincare",
-    price: 70,
-    currency: "GHS",
-    image: productImageUrls.aloeMakeupRemover,
-    gallery: [productImageUrls.aloeMakeupRemover],
-    shortDescription: "Gentle cleansing remover for waterproof makeup.",
-    description: "Bi-phase formula melts makeup while leaving skin soothed and hydrated.",
-    inStock: true,
-    featured: false,
-    tags: ["skincare", "cleanse"]
-  },
-  "velvet-nude-lipstick": {
-    id: "p8",
-    slug: "velvet-nude-lipstick",
-    name: "Velvet Nude Lipstick",
-    type: "Lipstick",
-    category: "Lips",
-    price: 55,
-    currency: "GHS",
-    image: productImageUrls.velvetNudeLipstick,
-    gallery: [productImageUrls.velvetNudeLipstick],
-    shortDescription: "Creamy nude lipstick for versatile looks.",
-    description: "Comfort matte lipstick with rich pigment and all-day confidence.",
+    image: productImageUrls.neocellCollagen,
+    gallery: [productImageUrls.neocellCollagen],
+    shortDescription: "Collagen supplement for skin, hair, and nails.",
+    description:
+      "A collagen-focused supplement created to support skin elasticity, hair strength, and nail health.",
     inStock: true,
     featured: true,
-    tags: ["lipstick", "nude", "velvet"]
-  },
-  "liquid-eyeliner-jet-black": {
-    id: "p9",
-    slug: "liquid-eyeliner-jet-black",
-    name: "Liquid Eyeliner Jet Black",
-    type: "Eyeliner",
-    category: "Eyes",
-    price: 48,
-    currency: "GHS",
-    image: productImageUrls.liquidEyelinerJetBlack,
-    gallery: [productImageUrls.liquidEyelinerJetBlack],
-    shortDescription: "Quick-dry eyeliner with precise tip.",
-    description: "Create sharp wings and defined eyes with water-resistant wear.",
-    inStock: true,
-    featured: false,
-    tags: ["eyeliner", "eyes", "water-resistant"]
-  },
-  "overnight-lip-mask": {
-    id: "p10",
-    slug: "overnight-lip-mask",
-    name: "Overnight Lip Mask",
-    type: "Lip Care",
-    category: "Lips",
-    price: 60,
-    currency: "GHS",
-    image: productImageUrls.overnightLipMask,
-    gallery: [productImageUrls.overnightLipMask],
-    shortDescription: "Nourishing lip mask for soft lips by morning.",
-    description: "A restorative treatment infused with shea butter and vitamin E.",
-    inStock: false,
-    featured: false,
-    tags: ["lip-care", "hydrating"]
+    tags: ["collagen", "beauty", "supplement"]
   }
 };
 
