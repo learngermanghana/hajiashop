@@ -16,84 +16,98 @@ export type Product = {
 };
 
 const productImageUrls = {
-  happyHormones:
-    "https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  alphaArbutinCollagenPeptideDrink:
-    "https://images.pexels.com/photos/3735218/pexels-photo-3735218.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  bloom:
-    "https://images.pexels.com/photos/3873200/pexels-photo-3873200.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  neocellCollagen:
-    "https://images.pexels.com/photos/593451/pexels-photo-593451.jpeg?auto=compress&cs=tinysrgb&w=1200"
+  premixJulietEveMirificaBustUp: "/uploads/products/1.Premix Juliet  Eve Mirifica Bust up.jpeg",
+  snowWhiteFlawlessBeauty: "/uploads/products/2.Snow White Flawless Beauty.jpeg",
+  phytoBoosterWhitening: "/uploads/products/3.PhytoBooster Whitening.jpeg",
+  phytoCollagenKingOfWhitening: "/uploads/products/4.Phyto Collagen King of Whitening.jpeg",
+  ladiesShine: "/uploads/products/5.Ladies Shine.jpeg"
 } as const;
 
 export const productCatalog: Record<string, Product> = {
-  "happy-hormones": {
+  "premix-juliet-eve-mirifica-bust-up": {
     id: "p1",
-    slug: "happy-hormones",
-    name: "Happy Hormones",
-    type: "Supplement",
-    category: "Wellness",
-    price: 200,
+    slug: "premix-juliet-eve-mirifica-bust-up",
+    name: "Premix Juliet Eve Mirifica Bust up",
+    type: "Beauty Supplement",
+    category: "Whitening",
+    price: 450,
     currency: "GHS",
-    image: productImageUrls.happyHormones,
-    gallery: [productImageUrls.happyHormones],
-    shortDescription: "Hormone-support supplement for mood and balance.",
+    image: productImageUrls.premixJulietEveMirificaBustUp,
+    gallery: [productImageUrls.premixJulietEveMirificaBustUp],
+    shortDescription: "Enhances glow while supporting a fuller feminine look.",
     description:
-      "A daily wellness supplement formulated to support hormone balance and overall well-being.",
+      "Premix Juliet Eve Mirifica Bust up is crafted for women who want brighter skin confidence with everyday beauty support.",
     inStock: true,
     featured: true,
-    tags: ["wellness", "hormones", "supplement"]
+    tags: ["bust care", "glow", "beauty"]
   },
-  "7d-alpha-arbutin-collagen-peptide-drink": {
+  "snow-white-flawless-beauty": {
     id: "p2",
-    slug: "7d-alpha-arbutin-collagen-peptide-drink",
-    name: "7 D Alpha Arbutin Collagen Peptide Drink",
-    type: "Collagen Drink",
-    category: "Wellness",
-    price: 200,
+    slug: "snow-white-flawless-beauty",
+    name: "Snow White Flawless Beauty",
+    type: "Beauty Supplement",
+    category: "Whitening",
+    price: 450,
     currency: "GHS",
-    image: productImageUrls.alphaArbutinCollagenPeptideDrink,
-    gallery: [productImageUrls.alphaArbutinCollagenPeptideDrink],
-    shortDescription: "Collagen peptide drink with alpha arbutin blend.",
+    image: productImageUrls.snowWhiteFlawlessBeauty,
+    gallery: [productImageUrls.snowWhiteFlawlessBeauty],
+    shortDescription: "Daily beauty support for smooth, radiant-looking skin.",
     description:
-      "A beauty and wellness drink designed to support skin radiance with collagen peptides and alpha arbutin.",
+      "Snow White Flawless Beauty supports a bright and flawless beauty routine with a simple daily intake.",
     inStock: true,
     featured: true,
-    tags: ["collagen", "drink", "arbutin"]
+    tags: ["flawless", "radiance", "daily"]
   },
-  bloom: {
+  "phyto-booster-whitening": {
     id: "p3",
-    slug: "bloom",
-    name: "Bloom",
-    type: "Supplement",
-    category: "Wellness",
-    price: 350,
+    slug: "phyto-booster-whitening",
+    name: "PhytoBooster Whitening",
+    type: "Beauty Supplement",
+    category: "Whitening",
+    price: 450,
     currency: "GHS",
-    image: productImageUrls.bloom,
-    gallery: [productImageUrls.bloom],
-    shortDescription: "Daily wellness supplement for inner glow.",
+    image: productImageUrls.phytoBoosterWhitening,
+    gallery: [productImageUrls.phytoBoosterWhitening],
+    shortDescription: "Plant-powered formula to boost brightness and glow.",
     description:
-      "Bloom is a daily supplement crafted to support nutrition, vitality, and healthy skin from within.",
+      "PhytoBooster Whitening is a botanical-focused beauty booster designed to improve skin brilliance and confidence.",
     inStock: true,
     featured: false,
-    tags: ["daily", "wellness", "nutrition"]
+    tags: ["phyto", "boost", "whitening"]
   },
-  "neocell-collagen": {
+  "phyto-collagen-king-of-whitening": {
     id: "p4",
-    slug: "neocell-collagen",
-    name: "Neocell Collagen",
+    slug: "phyto-collagen-king-of-whitening",
+    name: "Phyto Collagen King of Whitening",
     type: "Collagen Supplement",
-    category: "Wellness",
-    price: 400,
+    category: "Whitening",
+    price: 450,
     currency: "GHS",
-    image: productImageUrls.neocellCollagen,
-    gallery: [productImageUrls.neocellCollagen],
-    shortDescription: "Collagen supplement for skin, hair, and nails.",
+    image: productImageUrls.phytoCollagenKingOfWhitening,
+    gallery: [productImageUrls.phytoCollagenKingOfWhitening],
+    shortDescription: "Collagen-rich whitening support for healthy skin glow.",
     description:
-      "A collagen-focused supplement created to support skin elasticity, hair strength, and nail health.",
+      "Phyto Collagen King of Whitening combines collagen and beauty nutrients to support a luminous complexion.",
     inStock: true,
     featured: true,
-    tags: ["collagen", "beauty", "supplement"]
+    tags: ["collagen", "whitening", "skin support"]
+  },
+  "ladies-shine": {
+    id: "p5",
+    slug: "ladies-shine",
+    name: "Ladies Shine",
+    type: "Beauty Supplement",
+    category: "Whitening",
+    price: 450,
+    currency: "GHS",
+    image: productImageUrls.ladiesShine,
+    gallery: [productImageUrls.ladiesShine],
+    shortDescription: "Everyday beauty formula to keep your shine on.",
+    description:
+      "Ladies Shine is made for women who want visible glow, confident skin, and a beauty routine that feels effortless.",
+    inStock: true,
+    featured: false,
+    tags: ["ladies", "shine", "beauty"]
   }
 };
 
