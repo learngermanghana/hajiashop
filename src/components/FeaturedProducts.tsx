@@ -1,8 +1,9 @@
 import ProductCard from "@/components/ProductCard";
 import SectionTitle from "@/components/SectionTitle";
-import { products } from "@/data/products";
+import { getCatalogData } from "@/lib/catalog";
 
-export default function FeaturedProducts() {
+export default async function FeaturedProducts() {
+  const { products } = await getCatalogData();
   const featured = products.filter((product) => product.featured).slice(0, 4);
 
   return (
