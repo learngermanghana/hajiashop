@@ -1,8 +1,10 @@
 import ProductGrid from "@/components/ProductGrid";
 import SectionTitle from "@/components/SectionTitle";
-import { productCategories, products } from "@/data/products";
+import { getCatalogData } from "@/lib/catalog";
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const { products, categories } = await getCatalogData();
+
   return (
     <section className="container-shell py-14">
       <SectionTitle
@@ -10,7 +12,7 @@ export default function ShopPage() {
         title="Find your perfect beauty essentials"
         description="Search products by name, type, and category."
       />
-      <ProductGrid products={products} categories={productCategories} />
+      <ProductGrid products={products} categories={categories} />
     </section>
   );
 }
