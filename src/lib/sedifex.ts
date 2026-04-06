@@ -242,8 +242,9 @@ function toProducts(payload: unknown, promotions: SedifexPromotion[]): Product[]
       const usePromo = matchingPromo && promoPrice !== null && promoPrice < basePrice && isPromoActive(matchingPromo, now);
 
       const imageUrl =
-        (data.image as string | undefined) ??
+        (data.imageUrl as string | undefined) ??
         (data.image_url as string | undefined) ??
+        (data.image as string | undefined) ??
         (data.thumbnail as string | undefined) ??
         "/uploads/products/placeholder.png";
 
@@ -257,7 +258,11 @@ function toProducts(payload: unknown, promotions: SedifexPromotion[]): Product[]
         id,
         slug: (data.slug as string | undefined) ?? slugify(name),
         name,
-        type: (data.type as string | undefined) ?? (data.product_type as string | undefined) ?? "Beauty Product",
+        type:
+          (data.itemType as string | undefined) ??
+          (data.type as string | undefined) ??
+          (data.product_type as string | undefined) ??
+          "Beauty Product",
         category: (data.category as string | undefined) ?? "General",
         price: usePromo ? (promoPrice as number) : basePrice,
         currency: (data.currency as string | undefined) ?? "GHS",
@@ -266,11 +271,12 @@ function toProducts(payload: unknown, promotions: SedifexPromotion[]): Product[]
         shortDescription:
           (data.short_description as string | undefined) ??
           (data.shortDescription as string | undefined) ??
+          (data.imageAlt as string | undefined) ??
           "High-quality beauty product from Sedifex catalog.",
         description:
           (data.description as string | undefined) ??
           "Imported automatically from Sedifex for live catalog sync.",
-        inStock: toBoolean(data.in_stock ?? data.inStock, true),
+        inStock: toBoolean(data.in_stock ?? data.inStock, (toNumber(data.stockCount) ?? 1) > 0),
         featured: toBoolean(data.featured, false),
         tags: Array.isArray(data.tags) ? (data.tags.filter((entry): entry is string => typeof entry === "string") as string[]) : []
       } satisfies Product;
