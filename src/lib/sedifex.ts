@@ -11,6 +11,27 @@ type SedifexPromotion = {
   isActive?: boolean;
 };
 
+export type SedifexPromoProfile = {
+  promoTitle?: string;
+  promoSummary?: string;
+  promoStartDate?: string;
+  promoEndDate?: string;
+  promoSlug?: string;
+  promoWebsiteUrl?: string;
+  displayName?: string;
+  name?: string;
+};
+
+export type SedifexPromoGalleryItem = {
+  url: string;
+  alt?: string;
+  caption?: string;
+  sortOrder?: number;
+  isPublished?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 const DEFAULT_TIMEOUT_MS = 10_000;
 
 function normalizeBaseUrl(baseUrl: string) {
@@ -62,13 +83,14 @@ function slugify(input: string) {
 async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const revalidateSeconds = toNumber(process.env.SEDIFEX_REVALIDATE_SECONDS) ?? 60;
 
   try {
     return await fetch(url, {
       ...init,
       signal: controller.signal,
       next: {
-        revalidate: 300
+        revalidate: revalidateSeconds
       }
     });
   } finally {
@@ -102,6 +124,38 @@ async function fetchSedifexResource(path: string) {
 
   if (!response.ok) {
     throw new Error(`Sedifex request failed for ${path} (${response.status})`);
+  }
+
+  return response.json();
+}
+
+async function fetchSedifexIntegrationResource(path: string) {
+  const baseUrl = process.env.SEDIFEX_API_BASE_URL ?? process.env.SEDIFEX_BASE_URL;
+  const apiKey = process.env.SEDIFEX_INTEGRATION_KEY ?? process.env.SEDIFEX_API_KEY;
+  const storeId = process.env.SEDIFEX_STORE_ID;
+
+  if (!baseUrl || !apiKey || !storeId) {
+    throw new Error("Sedifex integration is not configured. Missing SEDIFEX_API_BASE_URL, SEDIFEX_INTEGRATION_KEY, or SEDIFEX_STORE_ID.");
+  }
+
+  const timeoutMs = toNumber(process.env.SEDIFEX_TIMEOUT_MS) ?? DEFAULT_TIMEOUT_MS;
+  const endpoint = `${normalizeBaseUrl(baseUrl)}${path.startsWith("/") ? path : `/${path}`}?storeId=${encodeURIComponent(storeId)}`;
+
+  const response = await fetchWithTimeout(
+    endpoint,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "x-api-key": apiKey,
+        Accept: "application/json"
+      }
+    },
+    timeoutMs
+  );
+
+  if (!response.ok) {
+    throw new Error(`Sedifex integration request failed for ${path} (${response.status})`);
   }
 
   return response.json();
@@ -224,7 +278,95 @@ function toProducts(payload: unknown, promotions: SedifexPromotion[]): Product[]
     .filter((product) => Boolean(product.slug && product.name));
 }
 
+function dedupeProducts(products: Product[]): Product[] {
+  const seen = new Set<string>();
+  const unique: Product[] = [];
+
+  for (const product of products) {
+    const key = `${product.id}|${product.name}|${product.price}`;
+
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    unique.push(product);
+  }
+
+  return unique;
+}
+
+function toPromoProfile(payload: unknown): SedifexPromoProfile | null {
+  if (!payload || typeof payload !== "object") {
+    return null;
+  }
+
+  const data = payload as SedifexRecord;
+  const candidate = (data.promo ?? data.store ?? data.data ?? payload) as SedifexRecord;
+
+  return {
+    promoTitle: candidate.promoTitle as string | undefined,
+    promoSummary: candidate.promoSummary as string | undefined,
+    promoStartDate: candidate.promoStartDate as string | undefined,
+    promoEndDate: candidate.promoEndDate as string | undefined,
+    promoSlug: candidate.promoSlug as string | undefined,
+    promoWebsiteUrl: candidate.promoWebsiteUrl as string | undefined,
+    displayName: candidate.displayName as string | undefined,
+    name: candidate.name as string | undefined
+  };
+}
+
+function toPromoGallery(payload: unknown): SedifexPromoGalleryItem[] {
+  if (!payload) {
+    return [];
+  }
+
+  const records = Array.isArray(payload)
+    ? payload
+    : typeof payload === "object" && payload !== null && Array.isArray((payload as SedifexRecord).items)
+      ? ((payload as SedifexRecord).items as unknown[])
+      : typeof payload === "object" && payload !== null && Array.isArray((payload as SedifexRecord).data)
+        ? ((payload as SedifexRecord).data as unknown[])
+        : [];
+
+  return records
+    .flatMap((item) => {
+      const data = item as SedifexRecord;
+      const url = data.url as string | undefined;
+
+      if (!url) {
+        return [];
+      }
+
+      const normalized: SedifexPromoGalleryItem = {
+        url,
+        alt: data.alt as string | undefined,
+        caption: data.caption as string | undefined,
+        sortOrder: toNumber(data.sortOrder) ?? undefined,
+        isPublished: toBoolean(data.isPublished, true),
+        createdAt: data.createdAt as string | undefined,
+        updatedAt: data.updatedAt as string | undefined
+      };
+
+      return [normalized];
+    })
+    .sort((a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER));
+}
+
 export async function fetchSedifexCatalog(): Promise<Product[]> {
+  const integrationEnabled = Boolean(process.env.SEDIFEX_API_BASE_URL && process.env.SEDIFEX_STORE_ID);
+
+  if (integrationEnabled) {
+    const productsPayload = await fetchSedifexIntegrationResource("/integrationProducts");
+    const products = Array.isArray((productsPayload as SedifexRecord).products)
+      ? ((productsPayload as SedifexRecord).products as unknown[])
+      : Array.isArray(productsPayload)
+        ? (productsPayload as unknown[])
+        : [];
+
+    return dedupeProducts(toProducts(products, []));
+  }
+
   const productsPath = process.env.SEDIFEX_PRODUCTS_PATH ?? "/products";
   const promotionsPath = process.env.SEDIFEX_PROMOTIONS_PATH ?? "/promotions";
 
@@ -235,4 +377,22 @@ export async function fetchSedifexCatalog(): Promise<Product[]> {
 
   const promotions = toPromotions(promotionsPayload);
   return toProducts(productsPayload, promotions);
+}
+
+export async function fetchSedifexPromo(): Promise<SedifexPromoProfile | null> {
+  try {
+    const payload = await fetchSedifexIntegrationResource("/integrationPromo");
+    return toPromoProfile(payload);
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchSedifexPromoGallery(): Promise<SedifexPromoGalleryItem[]> {
+  try {
+    const payload = await fetchSedifexIntegrationResource("/integrationGallery");
+    return toPromoGallery(payload).filter((item) => item.isPublished !== false);
+  } catch {
+    return [];
+  }
 }

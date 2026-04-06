@@ -1,8 +1,11 @@
 import SectionTitle from "@/components/SectionTitle";
 import { getGalleryImages } from "@/lib/gallery";
+import { fetchSedifexPromoGallery } from "@/lib/sedifex";
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const promoGallery = await fetchSedifexPromoGallery();
   const images = getGalleryImages();
+  const resolvedImages = promoGallery.length ? promoGallery.map((item) => item.url) : images;
 
   return (
     <section className="container-shell py-14">
@@ -12,8 +15,8 @@ export default function GalleryPage() {
         description="A curated showcase of makeup looks and product shots from Hajia Slay Shop."
       />
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {(images.length
-          ? images
+        {(resolvedImages.length
+          ? resolvedImages
           : [
               "/uploads/gallery/look-1.jpg",
               "/uploads/gallery/look-2.jpg",

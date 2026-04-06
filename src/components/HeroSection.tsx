@@ -1,39 +1,55 @@
 import Link from "next/link";
 import { siteConfig } from "@/data/site";
+import { fetchSedifexPromo, fetchSedifexPromoGallery } from "@/lib/sedifex";
 
 const HERO_BACKGROUND_IMAGE = "/uploads/home/IMG_4435.JPG.jpeg";
 
-export default function HeroSection() {
+const FALLBACK_PROMO = {
+  title: `Welcome to ${siteConfig.name}`,
+  summary:
+    "Relax. Glow. Restore.\n\nPremium self-care with spa, beauty, salon and nails in Lapas."
+};
+
+export default async function HeroSection() {
+  const [promo, promoGallery] = await Promise.all([fetchSedifexPromo(), fetchSedifexPromoGallery()]);
+  const promoImage = promoGallery[0]?.url ?? HERO_BACKGROUND_IMAGE;
+  const promoTitle = promo?.promoTitle?.trim() || FALLBACK_PROMO.title;
+  const promoSummary = promo?.promoSummary?.trim() || FALLBACK_PROMO.summary;
+
   return (
     <section
       className="relative overflow-hidden"
       style={{
-        backgroundImage: `linear-gradient(rgba(17, 24, 39, 0.6), rgba(17, 24, 39, 0.45)), url(${HERO_BACKGROUND_IMAGE})`,
+        backgroundImage: `linear-gradient(rgba(17, 24, 39, 0.6), rgba(17, 24, 39, 0.45)), url(${promoImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center"
       }}
     >
       <div className="container-shell py-24 md:py-32">
         <div className="max-w-2xl">
-          <p className="font-semibold uppercase tracking-widest text-pink-100">Premium Beauty Store</p>
-          <h1 className="mt-4 text-4xl font-bold leading-tight text-white md:text-5xl">
-            Glow confidently with authentic makeup from {siteConfig.name}
-          </h1>
-          <p className="mt-5 text-lg text-pink-50">
-            Shop trusted cosmetic products for lips, face, and eyes. Order directly via WhatsApp or send a quick inquiry.
-          </p>
+          <p className="font-semibold uppercase tracking-widest text-pink-100">Promo Ad</p>
+          <h1 className="mt-4 text-4xl font-bold leading-tight text-white md:text-5xl">{promoTitle}</h1>
+          <p className="mt-5 whitespace-pre-line text-lg text-pink-50">{promoSummary}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link className="rounded-full bg-brand-500 px-6 py-3 font-medium text-white" href="/shop">
-              Shop Now
-            </Link>
             <a
               className="rounded-full border border-pink-100 bg-white/10 px-6 py-3 font-medium text-white backdrop-blur-sm"
               href={`https://wa.me/${siteConfig.whatsappNumber}`}
               target="_blank"
               rel="noreferrer"
             >
-              Order on WhatsApp
+              Book on WhatsApp
             </a>
+            <a
+              className="rounded-full bg-brand-500 px-6 py-3 font-medium text-white"
+              href={siteConfig.branch.mapsUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Get Directions ({siteConfig.branch.label})
+            </a>
+            <Link className="rounded-full bg-white px-6 py-3 font-medium text-brand-900" href="/shop">
+              View Products
+            </Link>
           </div>
         </div>
       </div>
