@@ -4,7 +4,9 @@ import { getCatalogData } from "@/lib/catalog";
 
 export default async function FeaturedProducts() {
   const { products } = await getCatalogData();
-  const featured = products.filter((product) => product.featured).slice(0, 4);
+  const featured = [...products]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 4);
 
   return (
     <section className="container-shell py-16">
