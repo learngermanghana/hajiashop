@@ -5,9 +5,9 @@ import { fetchSedifexPromo, fetchSedifexPromoGallery } from "@/lib/sedifex";
 const HERO_BACKGROUND_IMAGE = "/uploads/home/IMG_4435.JPG.jpeg";
 
 const FALLBACK_PROMO = {
-  title: `Welcome to ${siteConfig.name}`,
+  title: "Enjoy 50% off all products",
   summary:
-    "Relax. Glow. Restore.\n\nPremium self-care with spa, beauty, salon and nails in Lapas."
+    "Store: Hajiaslayempire\nContact: +233248045224\n\nShop quality beauty essentials, skincare, makeup, and more at amazing discounted prices. This is a limited-time offer, so grab your favorites now before stock runs out.\n\nOffer window: 2026-04-06 – 2026-04-12"
 };
 
 export default async function HeroSection() {
