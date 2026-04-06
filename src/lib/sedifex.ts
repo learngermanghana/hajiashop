@@ -32,6 +32,18 @@ export type SedifexPromoGalleryItem = {
   updatedAt?: string;
 };
 
+export type SedifexTopSellingProduct = {
+  productId: string;
+  name: string;
+  category?: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  itemType?: string;
+  qtySold: number;
+  grossSales: number;
+  lastSoldAt?: string;
+};
+
 const DEFAULT_TIMEOUT_MS = 10_000;
 
 function normalizeBaseUrl(baseUrl: string) {
@@ -139,10 +151,12 @@ async function fetchSedifexIntegrationResource(path: string) {
   }
 
   const timeoutMs = toNumber(process.env.SEDIFEX_TIMEOUT_MS) ?? DEFAULT_TIMEOUT_MS;
-  const endpoint = `${normalizeBaseUrl(baseUrl)}${path.startsWith("/") ? path : `/${path}`}?storeId=${encodeURIComponent(storeId)}`;
+  const endpointPath = path.startsWith("/") ? path : `/${path}`;
+  const endpointUrl = new URL(`${normalizeBaseUrl(baseUrl)}${endpointPath}`);
+  endpointUrl.searchParams.set("storeId", storeId);
 
   const response = await fetchWithTimeout(
-    endpoint,
+    endpointUrl.toString(),
     {
       method: "GET",
       headers: {
@@ -159,6 +173,44 @@ async function fetchSedifexIntegrationResource(path: string) {
   }
 
   return response.json();
+}
+
+function toTopSellingProducts(payload: unknown): SedifexTopSellingProduct[] {
+  if (!payload || typeof payload !== "object") {
+    return [];
+  }
+
+  const topSelling = Array.isArray((payload as SedifexRecord).topSelling)
+    ? ((payload as SedifexRecord).topSelling as unknown[])
+    : [];
+
+  return topSelling
+    .flatMap((item) => {
+      const data = item as SedifexRecord;
+      const productId = (data.productId as string | undefined) ?? (data.id as string | undefined);
+      const name = data.name as string | undefined;
+      const qtySold = toNumber(data.qtySold) ?? 0;
+      const grossSales = toNumber(data.grossSales) ?? 0;
+
+      if (!productId || !name) {
+        return [];
+      }
+
+      return [
+        {
+          productId,
+          name,
+          category: data.category as string | undefined,
+          imageUrl: data.imageUrl as string | undefined,
+          imageAlt: data.imageAlt as string | undefined,
+          itemType: data.itemType as string | undefined,
+          qtySold,
+          grossSales,
+          lastSoldAt: data.lastSoldAt as string | undefined
+        } satisfies SedifexTopSellingProduct
+      ];
+    })
+    .sort((a, b) => b.qtySold - a.qtySold);
 }
 
 function isPromoActive(promo: SedifexPromotion, now: Date) {
@@ -398,6 +450,17 @@ export async function fetchSedifexPromoGallery(): Promise<SedifexPromoGalleryIte
   try {
     const payload = await fetchSedifexIntegrationResource("/integrationGallery");
     return toPromoGallery(payload).filter((item) => item.isPublished !== false);
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchSedifexTopSelling(days = 30, limit = 10): Promise<SedifexTopSellingProduct[]> {
+  try {
+    const safeDays = Math.min(Math.max(Math.floor(days), 1), 365);
+    const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 50);
+    const payload = await fetchSedifexIntegrationResource(`/integrationTopSelling?days=${safeDays}&limit=${safeLimit}`);
+    return toTopSellingProducts(payload);
   } catch {
     return [];
   }
