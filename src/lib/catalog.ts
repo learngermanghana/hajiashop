@@ -13,16 +13,6 @@ function categoryList(products: Product[]) {
 }
 
 export async function getCatalogData(): Promise<CatalogData> {
-  const sedifexEnabled = process.env.SEDIFEX_SYNC_ENABLED === "true";
-
-  if (!sedifexEnabled) {
-    return {
-      products: fallbackProducts,
-      categories: fallbackCategories,
-      source: "static"
-    };
-  }
-
   try {
     const products = await fetchSedifexCatalog();
 
