@@ -92,6 +92,67 @@ function slugify(input: string) {
     .slice(0, 120);
 }
 
+function collectProductImages(data: SedifexRecord): string[] {
+  const imageCandidates: unknown[] = [
+    data.imageUrl,
+    data.image_url,
+    data.image,
+    data.thumbnail,
+    data.photo1,
+    data.photo_1,
+    data.photo2,
+    data.photo_2,
+    data.photo3,
+    data.photo_3,
+    data.image1,
+    data.image_1,
+    data.image2,
+    data.image_2,
+    data.image3,
+    data.image_3
+  ];
+
+  const pushImage = (value: unknown) => {
+    if (typeof value === "string" && value.trim()) {
+      imageCandidates.push(value.trim());
+    }
+  };
+
+  if (Array.isArray(data.gallery)) {
+    data.gallery.forEach(pushImage);
+  }
+
+  if (Array.isArray(data.photos)) {
+    data.photos.forEach(pushImage);
+  }
+
+  if (Array.isArray(data.images)) {
+    data.images.forEach(pushImage);
+  }
+
+  if (typeof data.gallery === "string") {
+    data.gallery.split(",").forEach(pushImage);
+  }
+
+  if (typeof data.photos === "string") {
+    data.photos.split(",").forEach(pushImage);
+  }
+
+  if (typeof data.images === "string") {
+    data.images.split(",").forEach(pushImage);
+  }
+
+  const unique = Array.from(
+    new Set(
+      imageCandidates
+        .filter((entry): entry is string => typeof entry === "string" && Boolean(entry.trim()))
+        .map((entry) => entry.trim())
+    )
+  );
+
+  return unique.slice(0, 3);
+}
+
 async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -293,18 +354,9 @@ function toProducts(payload: unknown, promotions: SedifexPromotion[]): Product[]
       const promoPrice = matchingPromo?.promoPrice ?? null;
       const usePromo = matchingPromo && promoPrice !== null && promoPrice < basePrice && isPromoActive(matchingPromo, now);
 
-      const imageUrl =
-        (data.imageUrl as string | undefined) ??
-        (data.image_url as string | undefined) ??
-        (data.image as string | undefined) ??
-        (data.thumbnail as string | undefined) ??
-        "/uploads/products/placeholder.png";
-
-      const gallery = Array.isArray(data.gallery)
-        ? (data.gallery.filter((entry): entry is string => typeof entry === "string") as string[])
-        : imageUrl
-          ? [imageUrl]
-          : [];
+      const images = collectProductImages(data);
+      const imageUrl = images[0] ?? "/uploads/products/placeholder.png";
+      const gallery = images.length ? images : [imageUrl];
 
       return {
         id,
