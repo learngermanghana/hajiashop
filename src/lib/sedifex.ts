@@ -412,15 +412,21 @@ function toPromoProfile(payload: unknown): SedifexPromoProfile | null {
   }
 
   const data = payload as SedifexRecord;
-  const candidate = (data.promo ?? data.store ?? data.data ?? payload) as SedifexRecord;
+  const candidate = (data.integrationPromo ?? data.promo ?? data.store ?? data.data ?? payload) as SedifexRecord;
 
   return {
-    promoTitle: candidate.promoTitle as string | undefined,
-    promoSummary: candidate.promoSummary as string | undefined,
-    promoStartDate: candidate.promoStartDate as string | undefined,
-    promoEndDate: candidate.promoEndDate as string | undefined,
-    promoSlug: candidate.promoSlug as string | undefined,
-    promoWebsiteUrl: candidate.promoWebsiteUrl as string | undefined,
+    promoTitle: (candidate.promoTitle as string | undefined) ?? (candidate.title as string | undefined),
+    promoSummary:
+      (candidate.promoSummary as string | undefined) ??
+      (candidate.summary as string | undefined) ??
+      (candidate.description as string | undefined),
+    promoStartDate: (candidate.promoStartDate as string | undefined) ?? (candidate.startDate as string | undefined),
+    promoEndDate: (candidate.promoEndDate as string | undefined) ?? (candidate.endDate as string | undefined),
+    promoSlug: (candidate.promoSlug as string | undefined) ?? (candidate.slug as string | undefined),
+    promoWebsiteUrl:
+      (candidate.promoWebsiteUrl as string | undefined) ??
+      (candidate.websiteUrl as string | undefined) ??
+      (candidate.link as string | undefined),
     displayName: candidate.displayName as string | undefined,
     name: candidate.name as string | undefined
   };
@@ -442,7 +448,11 @@ function toPromoGallery(payload: unknown): SedifexPromoGalleryItem[] {
   return records
     .flatMap((item) => {
       const data = item as SedifexRecord;
-      const url = data.url as string | undefined;
+      const url =
+        (data.url as string | undefined) ??
+        (data.imageUrl as string | undefined) ??
+        (data.image as string | undefined) ??
+        (data.src as string | undefined);
 
       if (!url) {
         return [];

@@ -4,17 +4,11 @@ import { fetchSedifexPromo, fetchSedifexPromoGallery } from "@/lib/sedifex";
 
 const HERO_BACKGROUND_IMAGE = "/uploads/home/IMG_4435.JPG.jpeg";
 
-const FALLBACK_PROMO = {
-  title: "Enjoy 50% off all products",
-  summary:
-    "Store: Hajiaslayempire\nContact: +233248045224\n\nShop quality beauty essentials, skincare, makeup, and more at amazing discounted prices. This is a limited-time offer, so grab your favorites now before stock runs out.\n\nOffer window: 2026-04-06 – 2026-04-12"
-};
-
 export default async function HeroSection() {
   const [promo, promoGallery] = await Promise.all([fetchSedifexPromo(), fetchSedifexPromoGallery()]);
   const promoImage = promoGallery[0]?.url ?? HERO_BACKGROUND_IMAGE;
-  const promoTitle = promo?.promoTitle?.trim() || FALLBACK_PROMO.title;
-  const promoSummary = promo?.promoSummary?.trim() || FALLBACK_PROMO.summary;
+  const promoTitle = promo?.promoTitle?.trim() || promo?.name?.trim() || promo?.displayName?.trim() || "Latest promo";
+  const promoSummary = promo?.promoSummary?.trim() || "Follow our latest store promotion and limited-time offers.";
 
   return (
     <section
