@@ -37,7 +37,7 @@ export default async function FeaturedProducts() {
         }
       />
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {bestSellers.map(({ product, qtySold, grossSales, lastSoldAt }) => (
+        {bestSellers.map(({ product, lastSoldAt }) => (
           <article key={product.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:shadow-md">
             <img src={product.image} alt={product.name} className="h-56 w-full rounded-xl object-cover" />
             <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-brand-700">{product.type}</p>
@@ -49,22 +49,14 @@ export default async function FeaturedProducts() {
                 View details
               </Link>
             </div>
-            <dl className="mt-4 space-y-1 rounded-xl bg-pink-50 p-3 text-xs text-gray-700">
-              <div className="flex items-center justify-between">
-                <dt>Units sold (30d)</dt>
-                <dd className="font-semibold">{qtySold}</dd>
-              </div>
-              <div className="flex items-center justify-between">
-                <dt>Gross sales (30d)</dt>
-                <dd className="font-semibold">{formatCurrency(grossSales, product.currency)}</dd>
-              </div>
-              {lastSoldAt ? (
+            {lastSoldAt ? (
+              <dl className="mt-4 space-y-1 rounded-xl bg-pink-50 p-3 text-xs text-gray-700">
                 <div className="flex items-center justify-between">
                   <dt>Last sold</dt>
                   <dd className="font-semibold">{new Date(lastSoldAt).toLocaleDateString("en-US")}</dd>
                 </div>
-              ) : null}
-            </dl>
+              </dl>
+            ) : null}
           </article>
         ))}
       </div>
