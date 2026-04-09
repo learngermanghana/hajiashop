@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import { Product } from "@/data/products";
+import { siteConfig } from "@/data/site";
 
 type Props = {
   products: Product[];
@@ -111,7 +112,21 @@ export default function ProductGrid({ products, categories }: Props) {
           )}
         </>
       ) : (
-        <p className="rounded-xl bg-pink-50 p-6 text-gray-600">No products found. Try another search keyword.</p>
+        <div className="rounded-xl bg-pink-50 p-6 text-gray-600">
+          <p>No products found. Try another search keyword.</p>
+          <p className="mt-2">
+            Need help?{" "}
+            <a
+              href={`https://wa.me/${siteConfig.whatsappNumber}`}
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-brand-700 underline"
+            >
+              Contact us on WhatsApp
+            </a>
+            .
+          </p>
+        </div>
       )}
     </section>
   );
