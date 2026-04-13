@@ -25,6 +25,11 @@ export default function Footer() {
           </a>
         </div>
       </div>
+      <div className="border-t border-pink-100">
+        <p className="container-shell py-4 text-center text-sm text-gray-600">
+          Developed by Xenom IT Solutions, founders of Sedifex and Falowen App.
+        </p>
+      </div>
     </footer>
   );
 }
