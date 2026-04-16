@@ -1,0 +1,14 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Hajia Slay Shop logo</title>
+  <desc id="desc">Stylized monogram HSS on a pink gradient with rounded corners.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f9a8d4"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="232" height="232" rx="56" fill="url(#bg)"/>
+  <text x="128" y="150" text-anchor="middle" font-size="92" font-weight="700" font-family="Inter, Poppins, Arial, sans-serif" fill="white">
+    HS
+  </text>
+</svg>
