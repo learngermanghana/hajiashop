@@ -11,6 +11,11 @@ export const metadata: Metadata = {
     template: "%s | Hajia Slay Shop"
   },
   description: siteConfig.description,
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg"
+  },
   metadataBase: new URL(siteConfig.baseUrl)
 };
 
