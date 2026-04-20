@@ -5,11 +5,6 @@ import { getCatalogData } from "@/lib/catalog";
 import { formatCurrency } from "@/lib/helpers";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
 
-export async function generateStaticParams() {
-  const { products } = await getCatalogData();
-  return products.map((product) => ({ slug: product.slug }));
-}
-
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { products } = await getCatalogData();
   const { slug } = await params;
