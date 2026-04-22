@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { siteConfig } from "@/data/site";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 
 const links = [
   { href: "/", label: "Home" },
@@ -40,7 +41,7 @@ export default function Header() {
         <div className="flex items-center gap-3">
           <a
             className="hidden rounded-full bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 md:inline-flex"
-            href={`https://wa.me/${siteConfig.whatsappNumber}`}
+            href={buildWhatsAppLink()}
             target="_blank"
             rel="noreferrer"
           >
@@ -76,7 +77,7 @@ export default function Header() {
             <li>
               <a
                 className="inline-flex rounded-full bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-                href={`https://wa.me/${siteConfig.whatsappNumber}`}
+                href={buildWhatsAppLink()}
                 target="_blank"
                 rel="noreferrer"
               >
