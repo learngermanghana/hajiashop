@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import { Product } from "@/data/products";
-import { siteConfig } from "@/data/site";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 
 type Props = {
   products: Product[];
@@ -117,7 +117,7 @@ export default function ProductGrid({ products, categories }: Props) {
           <p className="mt-2">
             Need help?{" "}
             <a
-              href={`https://wa.me/${siteConfig.whatsappNumber}`}
+              href={buildWhatsAppLink()}
               target="_blank"
               rel="noreferrer"
               className="font-medium text-brand-700 underline"

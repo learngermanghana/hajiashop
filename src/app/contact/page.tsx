@@ -1,6 +1,7 @@
 import ContactForm from "@/components/ContactForm";
 import SectionTitle from "@/components/SectionTitle";
 import { siteConfig } from "@/data/site";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 
 const googleMapsEmbedUrl =
   "https://www.google.com/maps?q=5.6052354,-0.2473795&z=17&output=embed";
@@ -19,7 +20,7 @@ export default function ContactPage() {
           <p>Phone: {siteConfig.phone}</p>
           <a
             className="block text-brand-700"
-            href={`https://wa.me/${siteConfig.whatsappNumber}`}
+            href={buildWhatsAppLink()}
             target="_blank"
             rel="noreferrer"
           >

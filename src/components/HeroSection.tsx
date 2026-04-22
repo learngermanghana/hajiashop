@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { siteConfig } from "@/data/site";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 import { fetchSedifexPromo, fetchSedifexPromoGallery } from "@/lib/sedifex";
 
 const HERO_BACKGROUND_IMAGE = "/uploads/home/IMG_4435.JPG.jpeg";
@@ -27,7 +28,7 @@ export default async function HeroSection() {
           <div className="mt-8 flex flex-wrap gap-3">
             <a
               className="rounded-full border border-pink-100 bg-white/10 px-6 py-3 font-medium text-white backdrop-blur-sm"
-              href={`https://wa.me/${siteConfig.whatsappNumber}`}
+              href={buildWhatsAppLink()}
               target="_blank"
               rel="noreferrer"
             >

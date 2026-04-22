@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { siteConfig } from "@/data/site";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 
 export default function CTASection() {
   return (
@@ -9,7 +9,7 @@ export default function CTASection() {
         <p className="mt-2 text-pink-100">Send your order on WhatsApp or submit an inquiry now.</p>
         <div className="mt-6 flex gap-3">
           <a
-            href={`https://wa.me/${siteConfig.whatsappNumber}`}
+            href={buildWhatsAppLink()}
             target="_blank"
             rel="noreferrer"
             className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-brand-900"
