@@ -1,4 +1,5 @@
 import type { Product } from "@/data/products";
+import { normalizeCategory } from "@/lib/productTaxonomy";
 
 type SedifexRecord = Record<string, unknown>;
 
@@ -367,7 +368,7 @@ function toProducts(payload: unknown, promotions: SedifexPromotion[]): Product[]
           (data.type as string | undefined) ??
           (data.product_type as string | undefined) ??
           "Beauty Product",
-        category: (data.category as string | undefined) ?? "General",
+        category: normalizeCategory(data.category as string | undefined),
         price: usePromo ? (promoPrice as number) : basePrice,
         currency: (data.currency as string | undefined) ?? "GHS",
         image: imageUrl,

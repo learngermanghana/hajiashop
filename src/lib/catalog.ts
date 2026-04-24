@@ -1,5 +1,6 @@
 import { productCategories as fallbackCategories, products as fallbackProducts } from "@/data/products";
 import type { Product } from "@/data/products";
+import { categoryDeduplicationKey, normalizeCategory } from "@/lib/productTaxonomy";
 import { fetchSedifexCatalog } from "@/lib/sedifex";
 
 export type CatalogData = {
@@ -9,7 +10,9 @@ export type CatalogData = {
 };
 
 function categoryList(products: Product[]) {
-  return Array.from(new Set(products.map((product) => product.category)));
+  const normalized = products.map((product) => normalizeCategory(product.category));
+  const uniqueByCaseInsensitiveName = new Map(normalized.map((category) => [categoryDeduplicationKey(category), category]));
+  return Array.from(uniqueByCaseInsensitiveName.values());
 }
 
 export async function getCatalogData(): Promise<CatalogData> {
