@@ -3,7 +3,7 @@ export const siteConfig = {
   description:
     "Premium cosmetics and beauty essentials curated for confident everyday glam.",
   phone: "053 795 9673",
-  whatsappNumber: "233248045224",
+  whatsappNumber: "233537959673",
   branch: {
     label: "Lapas",
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Lapas,+Accra"
