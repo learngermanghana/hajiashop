@@ -8,7 +8,11 @@ const CATEGORY_RENAMES: Record<string, string> = {
   beverage: "Weight",
   beverages: "Weight",
   "skin care": "Skin Care",
-  skincare: "Skin Care"
+  skincare: "Skin Care",
+  product: "General",
+  products: "General",
+  "general product": "General",
+  "general products": "General"
 };
 
 export function normalizeCategory(category?: string | null) {
