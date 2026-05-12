@@ -84,3 +84,35 @@ export function getBlogExcerpt(content: string, maxLength = 140) {
 
   return `${stripped.slice(0, maxLength).trimEnd()}...`;
 }
+
+export function formatBlogContent(content: string) {
+  if (!content.trim()) {
+    return "";
+  }
+
+  if (/<[a-z][\s\S]*>/i.test(content)) {
+    return content;
+  }
+
+  const normalized = content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  const blocks = normalized.split(/\n\s*\n/).map((block) => block.trim()).filter(Boolean);
+
+  const rendered = blocks.map((block) => {
+    if (block.includes("\n-") || block.startsWith("- ")) {
+      const items = block
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith("- "))
+        .map((line) => `<li>${line.replace(/^-\s*/, "")}</li>`)
+        .join("");
+
+      if (items) {
+        return `<ul>${items}</ul>`;
+      }
+    }
+
+    return `<p>${block.replace(/\n/g, "<br />")}</p>`;
+  });
+
+  return rendered.join("");
+}
