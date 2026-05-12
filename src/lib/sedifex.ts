@@ -237,6 +237,55 @@ async function fetchSedifexIntegrationResource(path: string) {
   return response.json();
 }
 
+async function requestSedifexIntegrationResource(path: string, init: RequestInit) {
+  const baseUrl = process.env.SEDIFEX_API_BASE_URL ?? process.env.SEDIFEX_BASE_URL;
+  const apiKey = process.env.SEDIFEX_INTEGRATION_KEY ?? process.env.SEDIFEX_API_KEY;
+
+  if (!baseUrl || !apiKey) {
+    throw new Error("Sedifex integration is not configured. Missing SEDIFEX_API_BASE_URL or SEDIFEX_INTEGRATION_KEY.");
+  }
+
+  const timeoutMs = toNumber(process.env.SEDIFEX_TIMEOUT_MS) ?? DEFAULT_TIMEOUT_MS;
+  const endpointPath = path.startsWith("/") ? path : `/${path}`;
+  const endpoint = `${normalizeBaseUrl(baseUrl)}${endpointPath}`;
+
+  const response = await fetchWithTimeout(
+    endpoint,
+    {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "x-api-key": apiKey,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-Sedifex-Contract-Version": process.env.SEDIFEX_CONTRACT_VERSION ?? "2026-04-13",
+        ...init.headers
+      }
+    },
+    timeoutMs
+  );
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Sedifex integration request failed for ${path} (${response.status}): ${details.slice(0, 200)}`);
+  }
+
+  return response.json();
+}
+
+export async function createSedifexCheckoutSession(payload: Record<string, unknown>) {
+  return requestSedifexIntegrationResource("/integration/checkout/create", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function fetchSedifexOrderByReference(reference: string) {
+  return requestSedifexIntegrationResource(`/integration/orders/${encodeURIComponent(reference)}`, {
+    method: "GET"
+  });
+}
+
 function toTopSellingProducts(payload: unknown): SedifexTopSellingProduct[] {
   if (!payload || typeof payload !== "object") {
     return [];
