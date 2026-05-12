@@ -6,8 +6,13 @@ import HeroSection from "@/components/HeroSection";
 import SectionTitle from "@/components/SectionTitle";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import TikTokSection from "@/components/TikTokSection";
+import BlogCards from "@/components/blog/BlogCards";
+import { fetchSedifexBlogPosts } from "@/lib/blog";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const posts = await fetchSedifexBlogPosts();
+  const latestUpdates = posts.slice(0, 3);
+
   return (
     <>
       <HeroSection />
@@ -30,6 +35,14 @@ export default function HomePage() {
         </div>
       </section>
       <TestimonialsSection />
+      <section className="container-shell py-16">
+        <SectionTitle eyebrow="Updates" title="Latest updates from OIT" />
+        {latestUpdates.length ? (
+          <BlogCards posts={latestUpdates} />
+        ) : (
+          <p className="text-sm text-gray-600">No published updates available right now.</p>
+        )}
+      </section>
       <TikTokSection />
       <GalleryPreview />
       <FAQPreview />
