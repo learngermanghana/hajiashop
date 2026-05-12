@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { siteConfig } from "@/data/site";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
+import { readCartFromStorage } from "@/lib/cart";
 
 const links = [
   { href: "/", label: "Home" },
@@ -18,77 +19,34 @@ const links = [
 ];
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [cartCount, setCartCount] = useState(0);
 
-  return (
-    <header className="sticky top-0 z-40 border-b border-pink-100 bg-white/95 backdrop-blur">
-      <div className="container-shell flex h-16 items-center justify-between">
-        <Link
-          href="/"
-          className="flex items-center gap-2 font-semibold text-brand-900"
-          onClick={() => setIsMenuOpen(false)}
-        >
-          <Image src="/logo.svg" alt={`${siteConfig.name} logo`} width={36} height={36} priority />
-          <span>{siteConfig.name}</span>
+  useEffect(() => {
+    const sync = () => setCartCount(readCartFromStorage().reduce((s, i) => s + i.qty, 0));
+    sync();
+    window.addEventListener("storage", sync);
+    window.addEventListener("cart:updated", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("cart:updated", sync);
+    };
+  }, []);
+
+  return <header className="sticky top-0 z-40 border-b border-pink-100 bg-white/95 backdrop-blur">{/* unchanged layout */}
+    <div className="container-shell flex h-16 items-center justify-between">
+      <Link href="/" className="flex items-center gap-2 font-semibold text-brand-900">
+        <Image src="/logo.svg" alt={`${siteConfig.name} logo`} width={36} height={36} priority />
+        <span>{siteConfig.name}</span>
+      </Link>
+      <nav className="hidden gap-5 text-sm md:flex">
+        {links.map((link) => <Link key={link.href} href={link.href} className="text-gray-700 hover:text-brand-700">{link.label}</Link>)}
+      </nav>
+      <div className="flex items-center gap-3">
+        <Link href="/checkout" className="relative rounded-full border border-pink-200 px-4 py-2 text-sm font-medium min-h-11">Cart
+          {cartCount > 0 ? <span className="ml-2 inline-flex min-w-6 justify-center rounded-full bg-brand-600 px-1 text-white">{cartCount}</span> : null}
         </Link>
-
-        <nav className="hidden gap-5 text-sm md:flex">
-          {links.map((link) => (
-            <Link key={link.href} href={link.href} className="text-gray-700 hover:text-brand-700">
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <a
-            className="hidden rounded-full bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 md:inline-flex"
-            href={buildWhatsAppLink()}
-            target="_blank"
-            rel="noreferrer"
-          >
-            WhatsApp Order
-          </a>
-
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-md border border-pink-100 p-2 text-brand-900 md:hidden"
-            aria-label="Toggle navigation menu"
-            aria-expanded={isMenuOpen}
-            onClick={() => setIsMenuOpen((current) => !current)}
-          >
-            <span className="text-xl leading-none">☰</span>
-          </button>
-        </div>
+        <a className="hidden rounded-full bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 md:inline-flex" href={buildWhatsAppLink()} target="_blank" rel="noreferrer">WhatsApp Order</a>
       </div>
-
-      {isMenuOpen ? (
-        <nav className="border-t border-pink-100 bg-white px-4 py-3 md:hidden">
-          <ul className="space-y-3">
-            {links.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="block text-sm font-medium text-gray-700 hover:text-brand-700"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <a
-                className="inline-flex rounded-full bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-                href={buildWhatsAppLink()}
-                target="_blank"
-                rel="noreferrer"
-              >
-                WhatsApp Order
-              </a>
-            </li>
-          </ul>
-        </nav>
-      ) : null}
-    </header>
-  );
+    </div>
+  </header>;
 }
