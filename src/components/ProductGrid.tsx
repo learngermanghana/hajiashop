@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import { Product } from "@/data/products";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
@@ -10,31 +10,154 @@ type Props = {
   categories: string[];
 };
 
+const PRODUCTS_PER_PAGE = 9;
+const RECENT_SEARCHES_KEY = "shop:recent-searches";
+const MAX_RECENT_SEARCHES = 5;
+
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  sneakers: ["shoes", "trainers", "kicks"],
+  shoes: ["sneakers", "trainers", "kicks"],
+  tee: ["tshirt", "shirt", "top"],
+  tshirt: ["tee", "shirt", "top"],
+  jersey: ["shirt", "top"],
+  pants: ["trousers", "bottoms"],
+  hoodie: ["sweatshirt", "jumper"],
+  adidas: ["adiddas", "adiadas"],
+  nike: ["nik", "nkie"],
+  puma: ["puuma"]
+};
+
+const normalizeTerm = (value: string) => value.toLowerCase().trim();
+
+const levenshteinDistance = (left: string, right: string) => {
+  const matrix = Array.from({ length: left.length + 1 }, () => Array(right.length + 1).fill(0));
+
+  for (let i = 0; i <= left.length; i += 1) matrix[i][0] = i;
+  for (let j = 0; j <= right.length; j += 1) matrix[0][j] = j;
+
+  for (let i = 1; i <= left.length; i += 1) {
+    for (let j = 1; j <= right.length; j += 1) {
+      const cost = left[i - 1] === right[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+
+  return matrix[left.length][right.length];
+};
+
 export default function ProductGrid({ products, categories }: Props) {
-  const PRODUCTS_PER_PAGE = 9;
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [page, setPage] = useState(1);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  useEffect(() => {
+    const savedSearches = window.localStorage.getItem(RECENT_SEARCHES_KEY);
+    if (!savedSearches) return;
+
+    try {
+      const parsed = JSON.parse(savedSearches);
+      if (Array.isArray(parsed)) {
+        setRecentSearches(parsed.filter((item) => typeof item === "string"));
+      }
+    } catch {
+      window.localStorage.removeItem(RECENT_SEARCHES_KEY);
+    }
+  }, []);
+
+  const suggestionPool = useMemo(() => {
+    const terms = new Set<string>();
+
+    products.forEach((product) => {
+      [product.name, product.type, product.category].forEach((field) => {
+        if (field) terms.add(normalizeTerm(field));
+      });
+
+      product.shortDescription
+        .split(/\s+/)
+        .map((token) => token.replace(/[^a-zA-Z0-9]/g, ""))
+        .filter((token) => token.length >= 4)
+        .forEach((token) => terms.add(normalizeTerm(token)));
+    });
+
+    Object.entries(SEARCH_SYNONYMS).forEach(([base, related]) => {
+      terms.add(base);
+      related.forEach((term) => terms.add(term));
+    });
+
+    return Array.from(terms);
+  }, [products]);
+
+  const resolvedQuery = useMemo(() => {
+    const normalizedQuery = normalizeTerm(query);
+    if (!normalizedQuery) return "";
+
+    if (SEARCH_SYNONYMS[normalizedQuery]) return normalizedQuery;
+
+    const canonicalSynonym = Object.keys(SEARCH_SYNONYMS).find((key) =>
+      SEARCH_SYNONYMS[key].includes(normalizedQuery)
+    );
+    if (canonicalSynonym) return canonicalSynonym;
+
+    const closeMatch = suggestionPool.find((term) => {
+      if (Math.abs(term.length - normalizedQuery.length) > 2) return false;
+      return levenshteinDistance(term, normalizedQuery) <= 2;
+    });
+
+    return closeMatch ?? normalizedQuery;
+  }, [query, suggestionPool]);
 
   const filtered = useMemo(() => {
     return products.filter((product) => {
       const categoryMatch = category === "All" || product.category === category;
-      const searchPool = `${product.name} ${product.type} ${product.shortDescription}`.toLowerCase();
-      const queryMatch = searchPool.includes(query.toLowerCase());
+      const searchPool = `${product.name} ${product.type} ${product.shortDescription} ${product.category}`.toLowerCase();
+      const synonymTerms = SEARCH_SYNONYMS[resolvedQuery] ?? [];
+      const queryMatch = !resolvedQuery
+        || searchPool.includes(resolvedQuery)
+        || synonymTerms.some((term) => searchPool.includes(term));
       return categoryMatch && queryMatch;
     });
-  }, [products, category, query]);
+  }, [products, category, resolvedQuery]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE));
   const currentPage = Math.min(page, totalPages);
   const paginated = useMemo(() => {
     const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
     return filtered.slice(start, start + PRODUCTS_PER_PAGE);
-  }, [filtered, currentPage, PRODUCTS_PER_PAGE]);
+  }, [filtered, currentPage]);
+
+  const suggestions = useMemo(() => {
+    const normalizedQuery = normalizeTerm(query);
+    if (!normalizedQuery) return recentSearches;
+
+    const matches = suggestionPool
+      .filter((term) => term.includes(normalizedQuery) || levenshteinDistance(term, normalizedQuery) <= 2)
+      .slice(0, 6);
+
+    return Array.from(new Set(matches));
+  }, [query, recentSearches, suggestionPool]);
+
+  const persistRecentSearch = (value: string) => {
+    const term = normalizeTerm(value);
+    if (!term) return;
+
+    const updated = [term, ...recentSearches.filter((item) => item !== term)].slice(0, MAX_RECENT_SEARCHES);
+    setRecentSearches(updated);
+    window.localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+  };
 
   const updateQuery = (value: string) => {
     setQuery(value);
     setPage(1);
+  };
+
+  const applySuggestion = (value: string) => {
+    updateQuery(value);
+    persistRecentSearch(value);
   };
 
   const updateCategory = (value: string) => {
@@ -48,12 +171,31 @@ export default function ProductGrid({ products, categories }: Props) {
   return (
     <section>
       <div className="mb-6 grid gap-3 md:grid-cols-[1fr_auto]">
-        <input
-          value={query}
-          onChange={(event) => updateQuery(event.target.value)}
-          placeholder="Search by name, type, or description"
-          className="rounded-xl border border-gray-200 px-4 py-2"
-        />
+        <div className="relative">
+          <input
+            value={query}
+            onChange={(event) => updateQuery(event.target.value)}
+            onBlur={() => persistRecentSearch(query)}
+            placeholder="Search products (supports suggestions + typo fixes)"
+            className="w-full rounded-xl border border-gray-200 px-4 py-2"
+          />
+          {suggestions.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full rounded-xl border border-pink-100 bg-white p-1 shadow-lg">
+              {suggestions.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    applySuggestion(suggestion);
+                  }}
+                  className="block w-full rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-pink-50"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="flex flex-wrap gap-2">
           {["All", ...categories].map((item) => (
             <button
