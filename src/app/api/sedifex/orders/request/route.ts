@@ -7,9 +7,23 @@ const cleanQuantity = (value: unknown) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
 };
 
+type RequestCartItem = { id?: unknown; productId?: unknown; qty?: unknown; quantity?: unknown };
+
 function normalizeBaseUrl(baseUrl: string) {
   return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 }
+
+const readRequestedItems = (body: Record<string, unknown>): Array<{ id: string; qty: number }> => {
+  const rawItems = Array.isArray(body.items) ? body.items : Array.isArray(body.cart) ? body.cart : [];
+  const fromList = rawItems
+    .map((item) => item as RequestCartItem)
+    .map((item) => ({ id: cleanText(item.id ?? item.productId, 180), qty: cleanQuantity(item.qty ?? item.quantity) }))
+    .filter((item) => item.id);
+
+  const singleProductId = cleanText(body.productId, 180);
+  if (singleProductId && fromList.length === 0) return [{ id: singleProductId, qty: cleanQuantity(body.quantity) }];
+  return fromList;
+};
 
 async function sendSedifexOrder(payload: Record<string, unknown>) {
   const baseUrl = process.env.SEDIFEX_API_BASE_URL ?? process.env.SEDIFEX_BASE_URL;
@@ -44,8 +58,6 @@ export async function POST(request: Request) {
     const storeId = process.env.SEDIFEX_STORE_ID;
     if (!storeId) return NextResponse.json({ ok: false, error: "SEDIFEX_STORE_ID is missing." }, { status: 500 });
 
-    const productId = cleanText(body.productId, 180);
-    const quantity = cleanQuantity(body.quantity);
     const customer = (body.customer ?? {}) as Record<string, unknown>;
     const delivery = (body.delivery ?? {}) as Record<string, unknown>;
     const customerName = cleanText(customer.name, 160);
@@ -53,32 +65,40 @@ export async function POST(request: Request) {
     const customerPhone = cleanText(customer.phone, 80);
     const deliveryLocation = cleanText(delivery.location, 300);
     const notes = cleanText(delivery.notes, 1000);
+    const requestedItems = readRequestedItems(body);
 
-    if (!productId) return NextResponse.json({ ok: false, error: "productId is required." }, { status: 400 });
+    if (requestedItems.length === 0) return NextResponse.json({ ok: false, error: "Cart is empty." }, { status: 400 });
     if (!customerName) return NextResponse.json({ ok: false, error: "Customer name is required." }, { status: 400 });
     if (!customerPhone) return NextResponse.json({ ok: false, error: "Customer phone is required." }, { status: 400 });
     if (!deliveryLocation) return NextResponse.json({ ok: false, error: "Delivery location is required." }, { status: 400 });
 
     const { products } = await getCatalogData();
-    const product = products.find((item) => item.id === productId || item.slug === productId);
-    if (!product) return NextResponse.json({ ok: false, error: "Product not found in Sedifex catalog." }, { status: 404 });
-    if (!product.inStock) return NextResponse.json({ ok: false, error: "This product is out of stock." }, { status: 400 });
+    const validatedItems = requestedItems.map((requested) => {
+      const product = products.find((item) => item.id === requested.id || item.slug === requested.id);
+      if (!product) throw new Error(`Product not found in Sedifex catalog: ${requested.id}`);
+      if (!product.inStock) throw new Error(`${product.name} is out of stock.`);
+      return { product, qty: requested.qty };
+    });
 
     const clientOrderId = cleanText(body.clientOrderId, 180) || `HAJ-POD-${Date.now()}`;
+    const first = validatedItems[0];
+    const productNames = validatedItems.map((item) => `${item.product.name} x${item.qty}`).join(", ");
+    const total = validatedItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
     const payload = {
       merchantId: storeId,
       storeId,
-      productId: product.id,
-      productName: product.name,
-      quantity,
-      unitPrice: product.price,
-      currency: product.currency,
+      productId: first.product.id,
+      productName: validatedItems.length === 1 ? first.product.name : productNames,
+      quantity: validatedItems.reduce((sum, item) => sum + item.qty, 0),
+      unitPrice: validatedItems.length === 1 ? first.product.price : total,
+      currency: first.product.currency,
       sourceChannel: "client_website",
       source_channel: "client_website",
       sourceLabel: "Hajia Slay Shop Website",
       source_label: "Hajia Slay Shop Website",
       clientOrderId,
       client_order_id: clientOrderId,
+      items: validatedItems.map((item) => ({ id: item.product.id, name: item.product.name, unitPrice: item.product.price, qty: item.qty, quantity: item.qty, type: "PRODUCT" })),
       customer: {
         name: customerName,
         email: customerEmail || null,
