@@ -204,12 +204,12 @@ async function fetchSedifexResource(path: string) {
 }
 
 async function fetchSedifexIntegrationResource(path: string) {
-  const baseUrl = process.env.SEDIFEX_API_BASE_URL ?? process.env.SEDIFEX_BASE_URL;
+  const baseUrl = getSedifexIntegrationApiBaseUrl();
   const apiKey = process.env.SEDIFEX_INTEGRATION_KEY ?? process.env.SEDIFEX_API_KEY;
   const storeId = process.env.SEDIFEX_STORE_ID;
 
   if (!baseUrl || !apiKey || !storeId) {
-    throw new Error("Sedifex integration is not configured. Missing SEDIFEX_API_BASE_URL, SEDIFEX_INTEGRATION_KEY, or SEDIFEX_STORE_ID.");
+    throw new Error("Sedifex integration is not configured. Missing SEDIFEX_INTEGRATION_API_BASE_URL (or SEDIFEX_API_BASE_URL), SEDIFEX_INTEGRATION_KEY, or SEDIFEX_STORE_ID.");
   }
 
   const timeoutMs = toNumber(process.env.SEDIFEX_TIMEOUT_MS) ?? DEFAULT_TIMEOUT_MS;
@@ -237,12 +237,20 @@ async function fetchSedifexIntegrationResource(path: string) {
   return response.json();
 }
 
+function getSedifexIntegrationApiBaseUrl() {
+  return process.env.SEDIFEX_INTEGRATION_API_BASE_URL ?? process.env.SEDIFEX_API_BASE_URL ?? process.env.SEDIFEX_BASE_URL;
+}
+
+function getSedifexCheckoutCreateUrl() {
+  return process.env.SEDIFEX_INTEGRATION_CHECKOUT_CREATE_URL;
+}
+
 async function requestSedifexIntegrationResource(path: string, init: RequestInit) {
-  const baseUrl = process.env.SEDIFEX_API_BASE_URL ?? process.env.SEDIFEX_BASE_URL;
+  const baseUrl = getSedifexIntegrationApiBaseUrl();
   const apiKey = process.env.SEDIFEX_INTEGRATION_KEY ?? process.env.SEDIFEX_API_KEY;
 
   if (!baseUrl || !apiKey) {
-    throw new Error("Sedifex integration is not configured. Missing SEDIFEX_API_BASE_URL or SEDIFEX_INTEGRATION_KEY.");
+    throw new Error("Sedifex integration is not configured. Missing SEDIFEX_INTEGRATION_API_BASE_URL (or SEDIFEX_API_BASE_URL) or SEDIFEX_INTEGRATION_KEY.");
   }
 
   const timeoutMs = toNumber(process.env.SEDIFEX_TIMEOUT_MS) ?? DEFAULT_TIMEOUT_MS;
@@ -274,6 +282,39 @@ async function requestSedifexIntegrationResource(path: string, init: RequestInit
 }
 
 export async function createSedifexCheckoutSession(payload: Record<string, unknown>) {
+  const apiKey = process.env.SEDIFEX_INTEGRATION_KEY ?? process.env.SEDIFEX_API_KEY;
+  const checkoutCreateUrl = getSedifexCheckoutCreateUrl();
+
+  if (checkoutCreateUrl) {
+    if (!apiKey) {
+      throw new Error("Sedifex integration is not configured. Missing SEDIFEX_INTEGRATION_KEY.");
+    }
+
+    const timeoutMs = toNumber(process.env.SEDIFEX_TIMEOUT_MS) ?? DEFAULT_TIMEOUT_MS;
+    const response = await fetchWithTimeout(
+      checkoutCreateUrl,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "x-api-key": apiKey,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "X-Sedifex-Contract-Version": process.env.SEDIFEX_CONTRACT_VERSION ?? "2026-04-13"
+        },
+        body: JSON.stringify(payload)
+      },
+      timeoutMs
+    );
+
+    if (!response.ok) {
+      const details = await response.text();
+      throw new Error(`Sedifex integration request failed for ${checkoutCreateUrl} (${response.status}): ${details.slice(0, 200)}`);
+    }
+
+    return response.json();
+  }
+
   return requestSedifexIntegrationResource("/integration/checkout/create", {
     method: "POST",
     body: JSON.stringify(payload)
@@ -524,7 +565,7 @@ function toPromoGallery(payload: unknown): SedifexPromoGalleryItem[] {
 }
 
 export async function fetchSedifexCatalog(): Promise<Product[]> {
-  const integrationEnabled = Boolean(process.env.SEDIFEX_API_BASE_URL && process.env.SEDIFEX_STORE_ID);
+  const integrationEnabled = Boolean(getSedifexIntegrationApiBaseUrl() && process.env.SEDIFEX_STORE_ID);
 
   if (integrationEnabled) {
     const productsPayload = await fetchSedifexIntegrationResource("/integrationProducts");
