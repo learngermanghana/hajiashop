@@ -1,34 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Product } from "@/data/products";
 import { addItemToCart } from "@/lib/cart";
 import { formatCurrency } from "@/lib/helpers";
 
 export default function ProductCheckoutPanel({ product }: { product: Product }) {
-  const router = useRouter();
   const [qty, setQty] = useState(1);
   const [cartMessage, setCartMessage] = useState("");
-  const [addedToCart, setAddedToCart] = useState(false);
-
-  const addSelectedItemToCart = () => {
-    addItemToCart({ id: product.id, qty });
-    window.dispatchEvent(new Event("cart:updated"));
-    setCartMessage(`${product.name} added to cart.`);
-    setAddedToCart(true);
-  };
 
   const addToCart = () => {
     if (!product.inStock) return;
-    addSelectedItemToCart();
-  };
-
-  const buyNow = () => {
-    if (!product.inStock) return;
-    addSelectedItemToCart();
-    router.push("/checkout");
+    addItemToCart({ id: product.id, qty });
+    window.dispatchEvent(new Event("cart:updated"));
+    setCartMessage(`${product.name} added to cart.`);
   };
 
   const total = product.price * qty;
@@ -39,10 +25,10 @@ export default function ProductCheckoutPanel({ product }: { product: Product }) 
       className="rounded-3xl border-2 border-brand-200 bg-white p-5 shadow-2xl shadow-pink-100/70 ring-4 ring-pink-50 lg:sticky lg:top-24"
     >
       <div className="rounded-2xl bg-gradient-to-br from-brand-900 to-brand-600 p-5 text-white">
-        <p className="text-xs font-bold uppercase tracking-[0.25em] text-pink-100">Ready to buy?</p>
+        <p className="text-xs font-bold uppercase tracking-[0.25em] text-pink-100">Add to cart</p>
         <h2 className="mt-2 text-2xl font-bold">Order this product</h2>
         <p className="mt-2 text-sm text-pink-50">
-          Choose quantity, then checkout now or add it to your cart and continue shopping.
+          Choose quantity, add the item once, then continue shopping or view your cart.
         </p>
       </div>
 
@@ -91,7 +77,7 @@ export default function ProductCheckoutPanel({ product }: { product: Product }) 
             <span className="text-sm font-semibold text-gray-600">Estimated total</span>
             <span className="text-2xl font-extrabold text-brand-950">{formatCurrency(total, product.currency)}</span>
           </div>
-          <p className="mt-1 text-xs text-gray-500">Delivery and payment details continue on the checkout page.</p>
+          <p className="mt-1 text-xs text-gray-500">Delivery and payment details continue after you view your cart.</p>
         </div>
 
         {!product.inStock ? (
@@ -102,18 +88,9 @@ export default function ProductCheckoutPanel({ product }: { product: Product }) 
 
         <button
           type="button"
-          onClick={buyNow}
-          disabled={!product.inStock}
-          className="min-h-14 rounded-full bg-brand-700 px-6 py-4 text-base font-extrabold text-white shadow-lg shadow-brand-200 transition hover:bg-brand-900 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
-        >
-          Buy now / Checkout
-        </button>
-
-        <button
-          type="button"
           onClick={addToCart}
           disabled={!product.inStock}
-          className="min-h-12 rounded-full border-2 border-brand-600 bg-white px-5 py-3 font-bold text-brand-800 transition hover:bg-pink-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
+          className="min-h-14 rounded-full bg-brand-700 px-6 py-4 text-base font-extrabold text-white shadow-lg shadow-brand-200 transition hover:bg-brand-900 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
         >
           Add to cart
         </button>
@@ -129,13 +106,13 @@ export default function ProductCheckoutPanel({ product }: { product: Product }) 
             href="/checkout"
             className="inline-flex min-h-11 items-center justify-center rounded-full bg-gray-900 px-5 py-3 text-sm font-bold text-white hover:bg-black"
           >
-            View cart / Checkout
+            View cart
           </Link>
         </div>
 
         {cartMessage ? (
           <p className="rounded-2xl bg-green-50 p-3 text-sm font-semibold text-green-700">
-            {cartMessage} You can checkout now or keep shopping.
+            {cartMessage} Continue shopping or view your cart when you are ready.
           </p>
         ) : null}
       </div>
