@@ -13,6 +13,17 @@ function normalizeBaseUrl(baseUrl: string) {
   return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 }
 
+function normalizeSedifexItemId(rawId: string, storeId: string) {
+  const id = cleanText(rawId, 240);
+  const storePrefix = `${storeId}_`;
+
+  if (storeId && id.startsWith(storePrefix)) {
+    return id.slice(storePrefix.length);
+  }
+
+  return id;
+}
+
 const DEFAULT_SEDIFEX_WEBHOOK_URL = "https://us-central1-sedifex-web.cloudfunctions.net/handlePaystackWebhook";
 
 function resolveCheckoutCreateUrl(baseUrl: string) {
@@ -124,8 +135,40 @@ export async function POST(request: Request) {
       source_label: "Hajia Slay Shop Website",
       orderType: "product",
       currency,
-      cart: validatedItems.map((item) => ({ productId: item.product.id, merchantId: storeId, merchant_id: storeId, storeId, store_id: storeId, quantity: item.qty, type: "PRODUCT" })),
-      items: validatedItems.map((item) => ({ id: item.product.id, productId: item.product.id, name: item.product.name, unitPrice: item.product.price, qty: item.qty, quantity: item.qty, type: "PRODUCT" })),
+      cart: validatedItems.map((item) => {
+        const productId = normalizeSedifexItemId(item.product.id, storeId);
+
+        return {
+          productId,
+          item_id: productId,
+          originalProductId: item.product.id,
+          merchantId: storeId,
+          merchant_id: storeId,
+          storeId,
+          store_id: storeId,
+          quantity: item.qty,
+          qty: item.qty,
+          type: "PRODUCT",
+          item_type: "product"
+        };
+      }),
+      items: validatedItems.map((item) => {
+        const productId = normalizeSedifexItemId(item.product.id, storeId);
+
+        return {
+          id: productId,
+          item_id: productId,
+          productId,
+          originalProductId: item.product.id,
+          name: item.product.name,
+          unitPrice: item.product.price,
+          price: item.product.price,
+          qty: item.qty,
+          quantity: item.qty,
+          type: "PRODUCT",
+          item_type: "product"
+        };
+      }),
       amount,
       customer: { name: customerName, email: customerEmail, phone: customerPhone },
       delivery: { location: deliveryLocation, notes: notes || null },
