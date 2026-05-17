@@ -32,9 +32,14 @@ export default async function HomePage() {
             <p className="mt-2 text-sm text-gray-600">Safe packaging and dependable dispatch for smooth customer experience.</p>
           </article>
         </div>
-        <p className="mt-5 rounded-xl border border-pink-100 bg-white p-4 text-sm text-gray-700">
-          Buy from our shop and verify us on <a href="https://www.sedifexmarket.com" target="_blank" rel="noreferrer" className="font-semibold text-brand-700 underline">www.sedifexmarket.com</a>. Buy directly from this website with delivery in 24 hours when you order before 4pm. Mobile money, credit cards, and pay on delivery are all accepted.
-        </p>
+        <ul className="mt-5 space-y-2 rounded-xl border border-pink-100 bg-white p-4 text-sm text-gray-700">
+          <li>🛍️ Buy from our shop.</li>
+          <li>
+            ✅ Verified on <a href="https://www.sedifexmarket.com" target="_blank" rel="noreferrer" className="font-semibold text-brand-700 underline">www.sedifexmarket.com</a>.
+          </li>
+          <li>🚚 24-hour delivery when you order before 4:00 PM.</li>
+          <li>💳 Mobile money, credit cards, and pay on delivery are all accepted.</li>
+        </ul>
       </section>
       <section className="container-shell py-16">
         <SectionTitle eyebrow="Updates" title="Latest updates and highlighted products" />
