@@ -37,6 +37,11 @@ type CheckoutCustomerSnapshot = {
   email?: string;
   phone?: string;
   deliveryLocation?: string;
+  reference?: string;
+  amountPaid?: number | string;
+  amount?: number | string;
+  currency?: string;
+  status?: string;
 };
 
 function firstValue<T>(...values: Array<T | null | undefined | "">) {
@@ -99,10 +104,11 @@ export default function SuccessPage() {
     details?.payment_reference,
     details?.paystackReference,
     urlReference,
+    customerSnapshot?.reference,
     "Pending"
   );
-  const amountPaid = firstValue(details?.amountPaid, details?.amount_paid, details?.amount);
-  const amountPaidLabel = formatAmount(amountPaid, details?.currency ?? "GHS");
+  const amountPaid = firstValue(details?.amountPaid, details?.amount_paid, details?.amount, customerSnapshot?.amountPaid, customerSnapshot?.amount);
+  const amountPaidLabel = formatAmount(amountPaid, details?.currency ?? customerSnapshot?.currency ?? "GHS");
 
   const status = useMemo(
     () =>
@@ -114,10 +120,12 @@ export default function SuccessPage() {
           details?.paymentStatus,
           details?.payment_status,
           details?.syncStatus,
-          details?.sync_status
+          details?.sync_status,
+          customerSnapshot?.status
         )
       ),
     [
+      customerSnapshot?.status,
       details?.orderStatus,
       details?.order_status,
       details?.paymentStatus,
