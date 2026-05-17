@@ -8,10 +8,30 @@ import { siteConfig } from "@/data/site";
 
 export const metadata: Metadata = {
   title: {
-    default: "Hajia Slay Shop | Premium Cosmetics & Beauty Essentials",
-    template: "%s | Hajia Slay Shop"
+    default: "Hajia Slay Shop Accra | Cosmetics, Skincare & Beauty Essentials",
+    template: "%s | Hajia Slay Shop Accra"
   },
   description: siteConfig.description,
+  keywords: siteConfig.keywords,
+  authors: [{ name: siteConfig.name }],
+  creator: siteConfig.name,
+  publisher: siteConfig.name,
+  alternates: {
+    canonical: siteConfig.baseUrl
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_GH",
+    url: siteConfig.baseUrl,
+    siteName: siteConfig.name,
+    title: "Hajia Slay Shop Accra | Verified Beauty Shop on Sedifex Market",
+    description: siteConfig.description
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hajia Slay Shop Accra | Cosmetics & Beauty Essentials",
+    description: siteConfig.shortDescription
+  },
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
