@@ -1,7 +1,6 @@
 import CTASection from "@/components/CTASection";
 import FAQPreview from "@/components/FAQPreview";
 import FeaturedProducts from "@/components/FeaturedProducts";
-import GalleryPreview from "@/components/GalleryPreview";
 import HeroSection from "@/components/HeroSection";
 import SectionTitle from "@/components/SectionTitle";
 import TestimonialsSection from "@/components/TestimonialsSection";
@@ -11,7 +10,7 @@ import { fetchSedifexBlogPosts } from "@/lib/blog";
 
 export default async function HomePage() {
   const posts = await fetchSedifexBlogPosts();
-  const latestUpdates = posts.slice(0, 3);
+  const latestUpdates = posts.slice(0, 4);
 
   return (
     <>
@@ -33,18 +32,20 @@ export default async function HomePage() {
             <p className="mt-2 text-sm text-gray-600">Safe packaging and dependable dispatch for smooth customer experience.</p>
           </article>
         </div>
+        <p className="mt-5 rounded-xl border border-pink-100 bg-white p-4 text-sm text-gray-700">
+          Buy from our shop and verify us on <a href="https://www.sedifexmarket.com" target="_blank" rel="noreferrer" className="font-semibold text-brand-700 underline">www.sedifexmarket.com</a>. Buy directly from this website with delivery in 24 hours when you order before 4pm. Mobile money, credit cards, and pay on delivery are all accepted.
+        </p>
       </section>
-      <TestimonialsSection />
       <section className="container-shell py-16">
-        <SectionTitle eyebrow="Updates" title="Latest updates from OIT" />
+        <SectionTitle eyebrow="Updates" title="Latest updates and highlighted products" />
         {latestUpdates.length ? (
           <BlogCards posts={latestUpdates} />
         ) : (
           <p className="text-sm text-gray-600">No published updates available right now.</p>
         )}
       </section>
+      <TestimonialsSection />
       <TikTokSection />
-      <GalleryPreview />
       <FAQPreview />
       <CTASection />
     </>
