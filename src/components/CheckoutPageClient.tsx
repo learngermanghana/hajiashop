@@ -9,6 +9,11 @@ import { formatCurrency } from "@/lib/helpers";
 type Props = { products: Product[] };
 type PaymentMethod = "online" | "pay_on_delivery";
 
+function isValidPhone(value: string) {
+  const digits = value.replace(/\D/g, "");
+  return digits.length >= 9 && digits.length <= 15;
+}
+
 export default function CheckoutPageClient({ products }: Props) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [status, setStatus] = useState("Review your cart, then continue to secure checkout.");
@@ -41,7 +46,8 @@ export default function CheckoutPageClient({ products }: Props) {
   const estimatedFee = subtotal > 0 ? subtotal * 0.02 : 0;
   const estimatedTotal = subtotal + estimatedFee;
   const isOnline = paymentMethod === "online";
-  const canSubmit = Boolean(details.length && name.trim() && phone.trim() && deliveryLocation.trim() && (!isOnline || email.trim()));
+  const phoneIsValid = isValidPhone(phone);
+  const canSubmit = Boolean(details.length && name.trim() && phone.trim() && phoneIsValid && deliveryLocation.trim() && (!isOnline || email.trim()));
 
   const persistCart = (next: CartItem[]) => {
     setCart(next);
@@ -66,6 +72,11 @@ export default function CheckoutPageClient({ products }: Props) {
   };
 
   const checkout = async () => {
+    if (!isValidPhone(phone)) {
+      setStatus("Please enter a valid phone number, for example 024 000 0000 or +233 24 000 0000.");
+      return;
+    }
+
     setIsSubmitting(true);
     setStatus("");
 
@@ -154,6 +165,7 @@ export default function CheckoutPageClient({ products }: Props) {
         <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" />
         <label htmlFor="phone" className="mt-3 block text-sm font-semibold">Phone</label>
         <input id="phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" placeholder="+233 20 000 0000" />
+        {phone.trim() && !phoneIsValid ? <p className="mt-1 text-xs text-red-700">Enter a valid phone number, not the delivery location.</p> : null}
 
         <h3 className="mt-5 font-semibold text-brand-900">Delivery details</h3>
         <label htmlFor="deliveryLocation" className="mt-3 block text-sm font-semibold">Location / address</label>
