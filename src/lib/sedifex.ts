@@ -252,20 +252,41 @@ function getSedifexCheckoutCreateUrl() {
   return process.env.SEDIFEX_INTEGRATION_CHECKOUT_CREATE_URL;
 }
 
-async function requestSedifexIntegrationResource(path: string, init: RequestInit) {
+function resolveSedifexEndpoint(path: string) {
   const baseUrl = getSedifexIntegrationApiBaseUrl();
-  const apiKey = process.env.SEDIFEX_INTEGRATION_KEY ?? process.env.SEDIFEX_API_KEY;
+  if (!baseUrl) return "";
 
-  if (!baseUrl || !apiKey) {
+  const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
+  const endpointPath = path.startsWith("/") ? path : `/${path}`;
+
+  if (normalizedBaseUrl.includes("cloudfunctions.net") && endpointPath.startsWith("/integration/orders/")) {
+    const reference = endpointPath.split("/").pop() ?? "";
+    const endpointUrl = new URL(`${normalizedBaseUrl}/integrationOrderStatus`);
+    endpointUrl.searchParams.set("reference", decodeURIComponent(reference));
+    return endpointUrl.toString();
+  }
+
+  return `${normalizedBaseUrl}${endpointPath}`;
+}
+
+async function requestSedifexIntegrationResource(path: string, init: RequestInit) {
+  const apiKey = process.env.SEDIFEX_INTEGRATION_KEY ?? process.env.SEDIFEX_API_KEY;
+  const storeId = process.env.SEDIFEX_STORE_ID;
+  const endpoint = resolveSedifexEndpoint(path);
+
+  if (!endpoint || !apiKey) {
     throw new Error("Sedifex integration is not configured. Missing SEDIFEX_INTEGRATION_API_BASE_URL (or SEDIFEX_API_BASE_URL) or SEDIFEX_INTEGRATION_KEY.");
   }
 
+  const endpointUrl = new URL(endpoint);
+  if (storeId && !endpointUrl.searchParams.has("storeId")) {
+    endpointUrl.searchParams.set("storeId", storeId);
+  }
+
   const timeoutMs = toNumber(process.env.SEDIFEX_TIMEOUT_MS) ?? DEFAULT_TIMEOUT_MS;
-  const endpointPath = path.startsWith("/") ? path : `/${path}`;
-  const endpoint = `${normalizeBaseUrl(baseUrl)}${endpointPath}`;
 
   const response = await fetchWithTimeout(
-    endpoint,
+    endpointUrl.toString(),
     {
       ...init,
       headers: {
