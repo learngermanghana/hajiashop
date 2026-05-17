@@ -191,7 +191,7 @@ export default function CheckoutPageClient({ products }: Props) {
           <option value="pay_on_delivery">Pay on delivery</option>
         </select>
 
-        <button disabled={!canSubmit || isSubmitting} onClick={checkout} className="mt-4 min-h-11 w-full rounded-full bg-brand-600 px-4 py-3 text-white disabled:bg-gray-300">
+        <button disabled={!canSubmit || isSubmitting} onClick={checkout} className="mt-4 min-h-11 w-full rounded-full bg-brand-700 px-4 py-3 font-bold text-white shadow-lg shadow-pink-200/70 transition hover:bg-brand-800 focus:outline-none focus:ring-4 focus:ring-pink-200 disabled:border disabled:border-brand-200 disabled:bg-brand-100 disabled:text-brand-700 disabled:shadow-none disabled:opacity-100 disabled:cursor-not-allowed">
           {isSubmitting ? "Submitting..." : isOnline ? "Checkout with Paystack" : "Place pay-on-delivery order"}
         </button>
       </aside>
