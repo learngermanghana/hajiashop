@@ -3,6 +3,7 @@ export const siteConfig = {
   description:
     "Premium cosmetics and beauty essentials curated for confident everyday glam.",
   phone: "053 795 9673",
+  supportEmail: "support@hajiaslayshop.com",
   whatsappNumber: "233537959673",
   branch: {
     label: "Lapas",

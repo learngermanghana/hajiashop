@@ -88,6 +88,12 @@ export default function CheckoutPageClient({ products }: Props) {
 
       const checkoutUrl = data.authorizationUrl ?? data.checkoutUrl;
       if (isOnline && checkoutUrl) {
+        sessionStorage.setItem("checkout:last_customer", JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          deliveryLocation: deliveryLocation.trim()
+        }));
         window.location.href = checkoutUrl;
         return;
       }
