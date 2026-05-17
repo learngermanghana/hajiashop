@@ -42,32 +42,33 @@ export default function ProductCheckoutPanel({ product }: { product: Product }) 
           className="min-h-11 rounded-lg border border-gray-200 px-3 py-2"
         />
 
-        {!addedToCart ? (
+        <button
+          type="button"
+          onClick={addToCart}
+          disabled={!product.inStock}
+          className="min-h-11 rounded-full bg-brand-600 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-gray-300"
+        >
+          Add to cart
+        </button>
+
+        <div className="grid gap-2 sm:grid-cols-2">
           <button
             type="button"
-            onClick={addToCart}
-            disabled={!product.inStock}
-            className="min-h-11 rounded-full bg-brand-600 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-gray-300"
+            onClick={() => setAddedToCart(false)}
+            disabled={!addedToCart}
+            className="min-h-11 rounded-full border border-brand-600 px-5 py-3 font-semibold text-brand-700 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
           >
-            Add to cart
+            Add more items
           </button>
-        ) : (
-          <div className="grid gap-2 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setAddedToCart(false)}
-              className="min-h-11 rounded-full border border-brand-600 px-5 py-3 font-semibold text-brand-700"
-            >
-              Add more items
-            </button>
-            <Link
-              href="/checkout"
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-600 px-5 py-3 font-semibold text-white"
-            >
-              Checkout now
-            </Link>
-          </div>
-        )}
+          <Link
+            href="/checkout"
+            aria-disabled={!addedToCart}
+            tabIndex={!addedToCart ? -1 : 0}
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-600 px-5 py-3 font-semibold text-white aria-disabled:pointer-events-none aria-disabled:bg-gray-300"
+          >
+            Checkout now
+          </Link>
+        </div>
 
         {cartMessage ? <p className="rounded-xl bg-green-50 p-3 text-sm text-green-700">{cartMessage}</p> : null}
       </div>
