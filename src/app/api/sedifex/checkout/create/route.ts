@@ -9,6 +9,8 @@ const cleanQuantity = (value: unknown) => {
 
 type RequestCartItem = { id?: unknown; productId?: unknown; qty?: unknown; quantity?: unknown };
 
+const CUSTOMER_PROCESSING_FEE_RATE = 0.02;
+
 function normalizeBaseUrl(baseUrl: string) {
   return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 }
@@ -22,6 +24,14 @@ function normalizeSedifexItemId(rawId: string, storeId: string) {
   }
 
   return id;
+}
+
+function roundMoney(value: number) {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+function calculateCustomerProcessingFee(subtotal: number) {
+  return roundMoney(subtotal * CUSTOMER_PROCESSING_FEE_RATE);
 }
 
 const DEFAULT_SEDIFEX_WEBHOOK_URL = "https://us-central1-sedifex-web.cloudfunctions.net/handlePaystackWebhook";
@@ -119,8 +129,20 @@ export async function POST(request: Request) {
     const clientOrderId = cleanText(body.clientOrderId, 180) || `HAJ-${Date.now()}`;
     const returnUrl = cleanText(body.returnUrl, 500);
     const cancelUrl = cleanText(body.cancelUrl, 500);
-    const amount = validatedItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
+    const subtotal = roundMoney(validatedItems.reduce((sum, item) => sum + item.product.price * item.qty, 0));
+    const customerProcessingFee = calculateCustomerProcessingFee(subtotal);
+    const amount = roundMoney(subtotal + customerProcessingFee);
     const webhookUrl = cleanText(process.env.SEDIFEX_WEBHOOK_URL, 500) || DEFAULT_SEDIFEX_WEBHOOK_URL;
+
+    const pricingSnapshot = {
+      currency,
+      subtotal,
+      customerProcessingFeeRate: CUSTOMER_PROCESSING_FEE_RATE,
+      customerProcessingFee,
+      finalTotal: amount,
+      final_total: amount * 100,
+      customerPaysProcessingFee: true
+    };
 
     const payload = {
       storeId,
@@ -170,6 +192,10 @@ export async function POST(request: Request) {
         };
       }),
       amount,
+      subtotal,
+      customerProcessingFee,
+      pricingSnapshot,
+      pricing_snapshot: pricingSnapshot,
       customer: { name: customerName, email: customerEmail, phone: customerPhone },
       delivery: { location: deliveryLocation, notes: notes || null },
       returnUrl: returnUrl || undefined,
@@ -185,6 +211,9 @@ export async function POST(request: Request) {
         sourceChannel: "client_website",
         sourceLabel: "Hajia Slay Shop Website",
         itemCount: validatedItems.length,
+        subtotal,
+        customerProcessingFee,
+        amount,
         deliveryLocation,
         webhookUrl,
       },
@@ -206,8 +235,8 @@ export async function POST(request: Request) {
       cleanText(firstCheckout?.reference, 220) ||
       clientOrderId;
 
-    console.info("checkout_reconcile", { clientOrderId, sedifexReference: reference, itemCount: validatedItems.length });
-    return NextResponse.json({ ok: true, ...result, checkoutUrl, authorizationUrl: checkoutUrl, reference, clientOrderId });
+    console.info("checkout_reconcile", { clientOrderId, sedifexReference: reference, subtotal, customerProcessingFee, amount, itemCount: validatedItems.length });
+    return NextResponse.json({ ok: true, ...result, checkoutUrl, authorizationUrl: checkoutUrl, reference, clientOrderId, amountPaid: amount, amount, subtotal, customerProcessingFee, currency });
   } catch (error) {
     return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Checkout create failed." }, { status: 500 });
   }
