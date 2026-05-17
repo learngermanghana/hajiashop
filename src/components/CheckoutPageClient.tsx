@@ -11,7 +11,7 @@ type PaymentMethod = "online" | "pay_on_delivery";
 
 export default function CheckoutPageClient({ products }: Props) {
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [status, setStatus] = useState("Totals updated when cart changes.");
+  const [status, setStatus] = useState("Review your cart, then continue to secure checkout.");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -35,8 +35,11 @@ export default function CheckoutPageClient({ products }: Props) {
     () => cart.map((cartItem) => ({ ...cartItem, product: products.find((product) => product.id === cartItem.id) })).filter((item) => item.product),
     [cart, products]
   );
+
   const subtotal = details.reduce((sum, item) => sum + (item.product?.price ?? 0) * item.qty, 0);
   const currency = details[0]?.product?.currency ?? "GHS";
+  const estimatedFee = subtotal > 0 ? subtotal * 0.02 : 0;
+  const estimatedTotal = subtotal + estimatedFee;
   const isOnline = paymentMethod === "online";
   const canSubmit = Boolean(details.length && name.trim() && phone.trim() && deliveryLocation.trim() && (!isOnline || email.trim()));
 
@@ -77,8 +80,8 @@ export default function CheckoutPageClient({ products }: Props) {
           customer: { name: name.trim(), email: email.trim(), phone: phone.trim() },
           delivery: { location: deliveryLocation.trim(), notes: notes.trim() },
           returnUrl: `${window.location.origin}/checkout/success`,
-          cancelUrl: `${window.location.origin}/checkout/failed`,
-        }),
+          cancelUrl: `${window.location.origin}/checkout/failed`
+        })
       });
       const data = await response.json();
       if (!response.ok || data.ok === false) throw new Error(data.error ?? "Unable to checkout.");
@@ -90,7 +93,7 @@ export default function CheckoutPageClient({ products }: Props) {
       }
 
       persistCart([]);
-      setStatus(`Pay-on-delivery order received. Reference: ${data.reference ?? data.clientOrderId ?? "N/A"}`);
+      setStatus(`Order confirmed. Reference: ${data.reference ?? data.clientOrderId ?? "N/A"}`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Unable to checkout.");
     } finally {
@@ -114,10 +117,13 @@ export default function CheckoutPageClient({ products }: Props) {
             <div className="flex-1">
               <p className="font-semibold text-brand-900">{item.product?.name}</p>
               <p className="text-sm text-gray-600">{formatCurrency(item.product?.price ?? 0, item.product?.currency ?? currency)} each</p>
-              <label htmlFor={`qty-${item.id}`} className="mt-3 block text-sm font-medium">Quantity</label>
-              <input id={`qty-${item.id}`} type="number" min={1} value={item.qty} onChange={(event) => updateQty(item.id, Number(event.target.value) || 1)} className="mt-1 block min-h-11 w-28 rounded border px-3 py-2" />
+              <div className="mt-3 flex items-center gap-2">
+                <button type="button" className="min-h-11 min-w-11 rounded-full border border-pink-200" onClick={() => updateQty(item.id, item.qty - 1)}>-</button>
+                <span className="min-w-8 text-center font-semibold">{item.qty}</span>
+                <button type="button" className="min-h-11 min-w-11 rounded-full border border-pink-200" onClick={() => updateQty(item.id, item.qty + 1)}>+</button>
+                <button type="button" onClick={() => removeItem(item.id)} className="ml-2 rounded-full border border-red-200 px-3 py-2 text-sm text-red-700">Remove</button>
+              </div>
             </div>
-            <button type="button" onClick={() => removeItem(item.id)} className="h-fit rounded-full border border-red-200 px-3 py-2 text-sm text-red-700">Remove</button>
           </div>
         </div>)}
         <div className="flex flex-wrap gap-3">
@@ -126,27 +132,41 @@ export default function CheckoutPageClient({ products }: Props) {
         </div>
       </div>
       <aside className="h-fit rounded-2xl border border-pink-100 bg-white p-5 shadow-sm md:sticky md:top-24">
-        <h2 className="font-semibold text-brand-900">Order summary</h2>
-        <p className="mt-2 text-lg font-bold">Subtotal: {formatCurrency(subtotal, currency)}</p>
-
-        <label htmlFor="paymentMethod" className="mt-4 block text-sm font-semibold">Payment method</label>
-        <select id="paymentMethod" value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)} className="mt-1 min-h-11 w-full rounded border px-3 py-2">
-          <option value="online">Pay online with Paystack</option>
-          <option value="pay_on_delivery">Pay on delivery</option>
-        </select>
+        <h2 className="font-semibold text-brand-900">Customer details</h2>
 
         <label htmlFor="fullName" className="mt-3 block text-sm font-semibold">Full name</label>
         <input id="fullName" value={name} onChange={(event) => setName(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" />
-        <label htmlFor="phone" className="mt-3 block text-sm font-semibold">Phone</label>
-        <input id="phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" placeholder="+233 20 000 0000" />
         <label htmlFor="email" className="mt-3 block text-sm font-semibold">Email {isOnline ? "" : "(optional)"}</label>
         <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" />
-        <label htmlFor="deliveryLocation" className="mt-3 block text-sm font-semibold">Delivery location</label>
+        <label htmlFor="phone" className="mt-3 block text-sm font-semibold">Phone</label>
+        <input id="phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" placeholder="+233 20 000 0000" />
+
+        <h3 className="mt-5 font-semibold text-brand-900">Delivery details</h3>
+        <label htmlFor="deliveryLocation" className="mt-3 block text-sm font-semibold">Location / address</label>
         <input id="deliveryLocation" value={deliveryLocation} onChange={(event) => setDeliveryLocation(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" placeholder="Town / area / landmark" />
-        <label htmlFor="notes" className="mt-3 block text-sm font-semibold">Order notes</label>
+        <label htmlFor="notes" className="mt-3 block text-sm font-semibold">Notes</label>
         <textarea id="notes" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} className="w-full rounded border px-3 py-2" />
+
+        <h3 className="mt-5 font-semibold text-brand-900">Order summary</h3>
+        <div className="mt-2 space-y-2 text-sm">
+          {details.map((item) => (
+            <div key={`summary-${item.id}`} className="flex items-center justify-between">
+              <span>{item.product?.name} x{item.qty}</span>
+              <span>{formatCurrency((item.product?.price ?? 0) * item.qty, item.product?.currency ?? currency)}</span>
+            </div>
+          ))}
+          <div className="flex items-center justify-between text-gray-600"><span>Estimated fees</span><span>{formatCurrency(estimatedFee, currency)}</span></div>
+          <div className="flex items-center justify-between font-bold text-brand-900"><span>Total</span><span>{formatCurrency(estimatedTotal, currency)}</span></div>
+        </div>
+
+        <label htmlFor="paymentMethod" className="mt-4 block text-sm font-semibold">Payment method</label>
+        <select id="paymentMethod" value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)} className="mt-1 min-h-11 w-full rounded border px-3 py-2">
+          <option value="online">Pay securely with Paystack</option>
+          <option value="pay_on_delivery">Pay on delivery</option>
+        </select>
+
         <button disabled={!canSubmit || isSubmitting} onClick={checkout} className="mt-4 min-h-11 w-full rounded-full bg-brand-600 px-4 py-3 text-white disabled:bg-gray-300">
-          {isSubmitting ? "Submitting..." : isOnline ? "Pay now" : "Place pay-on-delivery order"}
+          {isSubmitting ? "Submitting..." : isOnline ? "Checkout with Paystack" : "Place pay-on-delivery order"}
         </button>
       </aside>
     </div>
