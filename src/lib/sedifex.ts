@@ -21,6 +21,7 @@ export type SedifexPromoProfile = {
   promoWebsiteUrl?: string;
   displayName?: string;
   name?: string;
+  publicProfile?: SedifexRecord;
 };
 
 export type SedifexPromoGalleryItem = {
@@ -43,6 +44,12 @@ export type SedifexTopSellingProduct = {
   qtySold: number;
   grossSales: number;
   lastSoldAt?: string;
+};
+
+export type SedifexContactLinks = {
+  brand: { name?: string; logoUrl?: string };
+  contact: { phone?: string; whatsapp?: string; telegram?: string; email?: string; website?: string };
+  social: { instagram?: string; facebook?: string; tiktok?: string; youtube?: string; x?: string; linkedin?: string };
 };
 
 const DEFAULT_TIMEOUT_MS = 10_000;
@@ -519,7 +526,36 @@ function toPromoProfile(payload: unknown): SedifexPromoProfile | null {
       (candidate.websiteUrl as string | undefined) ??
       (candidate.link as string | undefined),
     displayName: candidate.displayName as string | undefined,
-    name: candidate.name as string | undefined
+    name: candidate.name as string | undefined,
+    publicProfile: (candidate.publicProfile as SedifexRecord | undefined) ?? undefined
+  };
+}
+
+export function toSedifexContactLinks(
+  promo: SedifexPromoProfile | null,
+  fallback: { name: string; phone?: string; whatsapp?: string; website?: string; tiktok?: string }
+): SedifexContactLinks {
+  const profile = (promo?.publicProfile ?? {}) as SedifexRecord;
+  return {
+    brand: {
+      name: (promo?.displayName ?? promo?.name ?? fallback.name) as string,
+      logoUrl: (profile.logoUrl as string | undefined) ?? undefined
+    },
+    contact: {
+      phone: ((profile.publicPhone as string | undefined) ?? fallback.phone) || undefined,
+      whatsapp: ((profile.whatsappNumber as string | undefined) ?? fallback.whatsapp) || undefined,
+      telegram: (profile.telegramNumber as string | undefined) ?? undefined,
+      email: (profile.publicEmail as string | undefined) ?? undefined,
+      website: ((profile.websiteUrl as string | undefined) ?? fallback.website) || undefined
+    },
+    social: {
+      instagram: (profile.instagramHandle as string | undefined) ?? undefined,
+      facebook: (profile.facebookUrl as string | undefined) ?? undefined,
+      tiktok: ((profile.tiktokHandle as string | undefined) ?? fallback.tiktok) || undefined,
+      youtube: (profile.youtubeUrl as string | undefined) ?? undefined,
+      x: (profile.xHandle as string | undefined) ?? undefined,
+      linkedin: (profile.linkedinUrl as string | undefined) ?? undefined
+    }
   };
 }
 

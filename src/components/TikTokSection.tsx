@@ -1,6 +1,16 @@
 import { siteConfig } from "@/data/site";
+import { fetchSedifexPromo, toSedifexContactLinks } from "@/lib/sedifex";
 
-export default function TikTokSection() {
+export default async function TikTokSection() {
+  const promo = await fetchSedifexPromo();
+  const contactLinks = toSedifexContactLinks(promo, {
+    name: siteConfig.name,
+    phone: siteConfig.phone,
+    whatsapp: siteConfig.whatsappNumber,
+    website: siteConfig.baseUrl,
+    tiktok: siteConfig.tiktok
+  });
+
   return (
     <section className="container-shell py-16">
       <div className="rounded-3xl bg-brand-900 p-8 text-white md:flex md:items-center md:justify-between">
@@ -10,7 +20,7 @@ export default function TikTokSection() {
           <p className="mt-2 text-pink-100">See product demos, customer transformations, and new arrivals.</p>
         </div>
         <a
-          href={siteConfig.tiktok}
+          href={contactLinks.social.tiktok ?? siteConfig.tiktok}
           target="_blank"
           rel="noreferrer"
           className="mt-4 inline-block rounded-full bg-white px-5 py-3 font-medium text-brand-900 md:mt-0"
