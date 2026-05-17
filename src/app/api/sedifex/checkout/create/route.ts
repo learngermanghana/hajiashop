@@ -13,6 +13,8 @@ function normalizeBaseUrl(baseUrl: string) {
   return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 }
 
+const DEFAULT_SEDIFEX_WEBHOOK_URL = "https://us-central1-sedifex-web.cloudfunctions.net/handlePaystackWebhook";
+
 function resolveCheckoutCreateUrl(baseUrl: string) {
   const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
   if (normalizedBaseUrl.includes("cloudfunctions.net")) {
@@ -107,6 +109,7 @@ export async function POST(request: Request) {
     const returnUrl = cleanText(body.returnUrl, 500);
     const cancelUrl = cleanText(body.cancelUrl, 500);
     const amount = validatedItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
+    const webhookUrl = cleanText(process.env.SEDIFEX_WEBHOOK_URL, 500) || DEFAULT_SEDIFEX_WEBHOOK_URL;
 
     const payload = {
       storeId,
@@ -128,6 +131,10 @@ export async function POST(request: Request) {
       delivery: { location: deliveryLocation, notes: notes || null },
       returnUrl: returnUrl || undefined,
       cancelUrl: cancelUrl || undefined,
+      webhookUrl,
+      webhook_url: webhookUrl,
+      callbackUrl: webhookUrl,
+      callback_url: webhookUrl,
       metadata: {
         storeId,
         merchantId: storeId,
@@ -136,6 +143,7 @@ export async function POST(request: Request) {
         sourceLabel: "Hajia Slay Shop Website",
         itemCount: validatedItems.length,
         deliveryLocation,
+        webhookUrl,
       },
       syncStatus: "pending",
       syncRequestedAt: new Date().toISOString(),
