@@ -7,7 +7,6 @@ import { CART_STORAGE_KEY, type CartItem, writeCartToStorage } from "@/lib/cart"
 import { formatCurrency } from "@/lib/helpers";
 
 type Props = { products: Product[] };
-type PaymentMethod = "online" | "pay_on_delivery";
 
 function isValidPhone(value: string) {
   const digits = value.replace(/\D/g, "");
@@ -22,7 +21,6 @@ export default function CheckoutPageClient({ products }: Props) {
   const [phone, setPhone] = useState("");
   const [deliveryLocation, setDeliveryLocation] = useState("");
   const [notes, setNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("online");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -45,9 +43,8 @@ export default function CheckoutPageClient({ products }: Props) {
   const currency = details[0]?.product?.currency ?? "GHS";
   const estimatedFee = subtotal > 0 ? subtotal * 0.02 : 0;
   const estimatedTotal = subtotal + estimatedFee;
-  const isOnline = paymentMethod === "online";
   const phoneIsValid = isValidPhone(phone);
-  const canSubmit = Boolean(details.length && name.trim() && phone.trim() && phoneIsValid && deliveryLocation.trim() && (!isOnline || email.trim()));
+  const canSubmit = Boolean(details.length && name.trim() && email.trim() && phone.trim() && phoneIsValid && deliveryLocation.trim());
 
   const persistCart = (next: CartItem[]) => {
     setCart(next);
@@ -81,12 +78,11 @@ export default function CheckoutPageClient({ products }: Props) {
     setStatus("");
 
     try {
-      const endpoint = isOnline ? "/api/sedifex/checkout/create" : "/api/sedifex/orders/request";
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/sedifex/checkout/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientOrderId: `HAJ-${isOnline ? "PAY" : "POD"}-${Date.now()}`,
+          clientOrderId: `HAJ-PAY-${Date.now()}`,
           items: details.map((item) => ({ id: item.id, qty: item.qty })),
           customer: { name: name.trim(), email: email.trim(), phone: phone.trim() },
           delivery: { location: deliveryLocation.trim(), notes: notes.trim() },
@@ -98,9 +94,9 @@ export default function CheckoutPageClient({ products }: Props) {
       if (!response.ok || data.ok === false) throw new Error(data.error ?? "Unable to checkout.");
 
       const checkoutUrl = data.authorizationUrl ?? data.checkoutUrl;
-      if (isOnline && checkoutUrl) {
+      if (checkoutUrl) {
         const reference = data.reference ?? data.paymentReference ?? data.payment_reference ?? data.clientOrderId ?? null;
-        const amountPaid = typeof data.amountPaid === "number" ? data.amountPaid : subtotal;
+        const amountPaid = typeof data.amountPaid === "number" ? data.amountPaid : estimatedTotal;
 
         sessionStorage.setItem("checkout:last_customer", JSON.stringify({
           name: name.trim(),
@@ -117,8 +113,7 @@ export default function CheckoutPageClient({ products }: Props) {
         return;
       }
 
-      persistCart([]);
-      setStatus(`Order confirmed. Reference: ${data.reference ?? data.clientOrderId ?? "N/A"}`);
+      throw new Error("Unable to open Paystack checkout.");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Unable to checkout.");
     } finally {
@@ -161,7 +156,7 @@ export default function CheckoutPageClient({ products }: Props) {
 
         <label htmlFor="fullName" className="mt-3 block text-sm font-semibold">Full name</label>
         <input id="fullName" value={name} onChange={(event) => setName(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" />
-        <label htmlFor="email" className="mt-3 block text-sm font-semibold">Email {isOnline ? "" : "(optional)"}</label>
+        <label htmlFor="email" className="mt-3 block text-sm font-semibold">Email</label>
         <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" />
         <label htmlFor="phone" className="mt-3 block text-sm font-semibold">Phone</label>
         <input id="phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" placeholder="+233 20 000 0000" />
@@ -181,18 +176,17 @@ export default function CheckoutPageClient({ products }: Props) {
               <span>{formatCurrency((item.product?.price ?? 0) * item.qty, item.product?.currency ?? currency)}</span>
             </div>
           ))}
-          <div className="flex items-center justify-between text-gray-600"><span>Estimated fees</span><span>{formatCurrency(estimatedFee, currency)}</span></div>
+          <div className="flex items-center justify-between text-gray-600"><span>Online payment fee</span><span>{formatCurrency(estimatedFee, currency)}</span></div>
           <div className="flex items-center justify-between font-bold text-brand-900"><span>Total</span><span>{formatCurrency(estimatedTotal, currency)}</span></div>
         </div>
 
-        <label htmlFor="paymentMethod" className="mt-4 block text-sm font-semibold">Payment method</label>
-        <select id="paymentMethod" value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)} className="mt-1 min-h-11 w-full rounded border px-3 py-2">
-          <option value="online">Pay securely with Paystack</option>
-          <option value="pay_on_delivery">Pay on delivery</option>
-        </select>
+        <div className="mt-4 rounded-2xl border border-pink-100 bg-pink-50 p-3 text-sm text-brand-900">
+          <p className="font-bold">Payment method</p>
+          <p className="mt-1">Online payment through Paystack only. For help or special requests, please contact us before placing the order.</p>
+        </div>
 
         <button disabled={!canSubmit || isSubmitting} onClick={checkout} className="mt-4 min-h-11 w-full rounded-full bg-brand-700 px-4 py-3 font-bold text-white shadow-lg shadow-pink-200/70 transition hover:bg-brand-800 focus:outline-none focus:ring-4 focus:ring-pink-200 disabled:border disabled:border-brand-200 disabled:bg-brand-100 disabled:text-brand-700 disabled:shadow-none disabled:opacity-100 disabled:cursor-not-allowed">
-          {isSubmitting ? "Submitting..." : isOnline ? "Checkout with Paystack" : "Place pay-on-delivery order"}
+          {isSubmitting ? "Submitting..." : "Checkout with Paystack"}
         </button>
       </aside>
     </div>
