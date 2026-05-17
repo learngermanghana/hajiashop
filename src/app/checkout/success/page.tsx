@@ -56,6 +56,13 @@ function formatAmount(value: number | string | undefined, currency = "GHS") {
   return value;
 }
 
+function formatPhone(value: string | undefined) {
+  const phone = typeof value === "string" ? value.trim() : "";
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 9 || digits.length > 15) return "Pending";
+  return phone;
+}
+
 function formatStatus(value: string | undefined) {
   if (!value) return "Syncing";
   const normalized = value.trim().toLowerCase();
@@ -97,7 +104,7 @@ export default function SuccessPage() {
 
   const customerName = firstValue(details?.customer?.name, details?.customerName, customerSnapshot?.name, "Customer");
   const customerEmail = firstValue(details?.customer?.email, details?.customerEmail, customerSnapshot?.email, "Pending");
-  const customerPhone = firstValue(details?.customer?.phone, details?.customerPhone, customerSnapshot?.phone, "Pending");
+  const customerPhone = formatPhone(firstValue(details?.customer?.phone, details?.customerPhone, customerSnapshot?.phone));
   const receiptReference = firstValue(
     details?.reference,
     details?.paymentReference,
