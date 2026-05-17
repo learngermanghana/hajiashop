@@ -88,11 +88,19 @@ export default function CheckoutPageClient({ products }: Props) {
 
       const checkoutUrl = data.authorizationUrl ?? data.checkoutUrl;
       if (isOnline && checkoutUrl) {
+        const reference = data.reference ?? data.paymentReference ?? data.payment_reference ?? data.clientOrderId ?? null;
+        const amountPaid = typeof data.amountPaid === "number" ? data.amountPaid : subtotal;
+
         sessionStorage.setItem("checkout:last_customer", JSON.stringify({
           name: name.trim(),
           email: email.trim(),
           phone: phone.trim(),
-          deliveryLocation: deliveryLocation.trim()
+          deliveryLocation: deliveryLocation.trim(),
+          reference,
+          amountPaid,
+          amount: amountPaid,
+          currency,
+          status: "success"
         }));
         window.location.href = checkoutUrl;
         return;
