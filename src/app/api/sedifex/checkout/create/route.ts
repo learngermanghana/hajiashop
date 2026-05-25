@@ -144,6 +144,41 @@ export async function POST(request: Request) {
       customerPaysProcessingFee: true
     };
 
+    const lineItems = validatedItems.map((item) => {
+      const productId = normalizeSedifexItemId(item.product.id, storeId);
+      const unitPrice = roundMoney(item.product.price);
+      const lineTotal = roundMoney(unitPrice * item.qty);
+
+      return {
+        id: productId,
+        item_id: productId,
+        productId,
+        product_id: productId,
+        originalProductId: item.product.id,
+        original_product_id: item.product.id,
+        name: item.product.name,
+        title: item.product.name,
+        sku: item.product.id,
+        merchantId: storeId,
+        merchant_id: storeId,
+        storeId,
+        store_id: storeId,
+        quantity: item.qty,
+        qty: item.qty,
+        unitPrice,
+        unit_price: unitPrice,
+        price: unitPrice,
+        lineTotal,
+        line_total: lineTotal,
+        total: lineTotal,
+        currency,
+        type: "PRODUCT",
+        item_type: "product"
+      };
+    });
+
+    const quantityTotal = lineItems.reduce((sum, item) => sum + item.qty, 0);
+
     const payload = {
       storeId,
       store_id: storeId,
@@ -157,40 +192,12 @@ export async function POST(request: Request) {
       source_label: "Hajia Slay Shop Website",
       orderType: "product",
       currency,
-      cart: validatedItems.map((item) => {
-        const productId = normalizeSedifexItemId(item.product.id, storeId);
-
-        return {
-          productId,
-          item_id: productId,
-          originalProductId: item.product.id,
-          merchantId: storeId,
-          merchant_id: storeId,
-          storeId,
-          store_id: storeId,
-          quantity: item.qty,
-          qty: item.qty,
-          type: "PRODUCT",
-          item_type: "product"
-        };
-      }),
-      items: validatedItems.map((item) => {
-        const productId = normalizeSedifexItemId(item.product.id, storeId);
-
-        return {
-          id: productId,
-          item_id: productId,
-          productId,
-          originalProductId: item.product.id,
-          name: item.product.name,
-          unitPrice: item.product.price,
-          price: item.product.price,
-          qty: item.qty,
-          quantity: item.qty,
-          type: "PRODUCT",
-          item_type: "product"
-        };
-      }),
+      cart: lineItems,
+      items: lineItems,
+      lineItems,
+      line_items: lineItems,
+      orderItems: lineItems,
+      order_items: lineItems,
       amount,
       subtotal,
       customerProcessingFee,
@@ -210,7 +217,12 @@ export async function POST(request: Request) {
         channel: "client_website",
         sourceChannel: "client_website",
         sourceLabel: "Hajia Slay Shop Website",
-        itemCount: validatedItems.length,
+        itemCount: lineItems.length,
+        quantityTotal,
+        itemNames: lineItems.map((item) => item.name).join(", "),
+        items: lineItems,
+        lineItems,
+        line_items: lineItems,
         subtotal,
         customerProcessingFee,
         amount,
@@ -235,8 +247,8 @@ export async function POST(request: Request) {
       cleanText(firstCheckout?.reference, 220) ||
       clientOrderId;
 
-    console.info("checkout_reconcile", { clientOrderId, sedifexReference: reference, subtotal, customerProcessingFee, amount, itemCount: validatedItems.length });
-    return NextResponse.json({ ok: true, ...result, checkoutUrl, authorizationUrl: checkoutUrl, reference, clientOrderId, amountPaid: amount, amount, subtotal, customerProcessingFee, currency });
+    console.info("checkout_reconcile", { clientOrderId, sedifexReference: reference, subtotal, customerProcessingFee, amount, itemCount: lineItems.length, quantityTotal });
+    return NextResponse.json({ ok: true, ...result, checkoutUrl, authorizationUrl: checkoutUrl, reference, clientOrderId, amountPaid: amount, amount, subtotal, customerProcessingFee, currency, items: lineItems, cart: lineItems, lineItems, line_items: lineItems, orderItems: lineItems, order_items: lineItems });
   } catch (error) {
     return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Checkout create failed." }, { status: 500 });
   }
