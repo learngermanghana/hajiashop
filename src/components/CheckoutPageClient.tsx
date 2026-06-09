@@ -5,13 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/data/products";
 import { CART_STORAGE_KEY, type CartItem, writeCartToStorage } from "@/lib/cart";
 import { formatCurrency } from "@/lib/helpers";
+import { normalizeCheckoutText, normalizeGhanaPhone, validateCheckoutDetails } from "@/lib/checkout-validation";
 
 type Props = { products: Product[] };
-
-function isValidPhone(value: string) {
-  const digits = value.replace(/\D/g, "");
-  return digits.length >= 9 && digits.length <= 15;
-}
 
 export default function CheckoutPageClient({ products }: Props) {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -43,8 +39,8 @@ export default function CheckoutPageClient({ products }: Props) {
   const currency = details[0]?.product?.currency ?? "GHS";
   const estimatedFee = subtotal > 0 ? subtotal * 0.02 : 0;
   const estimatedTotal = subtotal + estimatedFee;
-  const phoneIsValid = isValidPhone(phone);
-  const canSubmit = Boolean(details.length && name.trim() && email.trim() && phone.trim() && phoneIsValid && deliveryLocation.trim());
+  const validationErrors = validateCheckoutDetails({ name, email, phone, deliveryLocation });
+  const canSubmit = Boolean(details.length && !Object.keys(validationErrors).length);
 
   const persistCart = (next: CartItem[]) => {
     setCart(next);
@@ -69,10 +65,16 @@ export default function CheckoutPageClient({ products }: Props) {
   };
 
   const checkout = async () => {
-    if (!isValidPhone(phone)) {
-      setStatus("Please enter a valid phone number, for example 024 000 0000 or +233 24 000 0000.");
+    const firstError = Object.values(validationErrors)[0];
+    if (firstError) {
+      setStatus(firstError);
       return;
     }
+
+    const normalizedName = normalizeCheckoutText(name);
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPhone = normalizeGhanaPhone(phone);
+    const normalizedDeliveryLocation = normalizeCheckoutText(deliveryLocation);
 
     setIsSubmitting(true);
     setStatus("");
@@ -84,8 +86,8 @@ export default function CheckoutPageClient({ products }: Props) {
         body: JSON.stringify({
           clientOrderId: `HAJ-PAY-${Date.now()}`,
           items: details.map((item) => ({ id: item.id, qty: item.qty })),
-          customer: { name: name.trim(), email: email.trim(), phone: phone.trim() },
-          delivery: { location: deliveryLocation.trim(), notes: notes.trim() },
+          customer: { name: normalizedName, email: normalizedEmail, phone: normalizedPhone },
+          delivery: { location: normalizedDeliveryLocation, notes: notes.trim() },
           returnUrl: `${window.location.origin}/checkout/success`,
           cancelUrl: `${window.location.origin}/checkout/failed`
         })
@@ -99,10 +101,10 @@ export default function CheckoutPageClient({ products }: Props) {
         const amountPaid = typeof data.amountPaid === "number" ? data.amountPaid : estimatedTotal;
 
         sessionStorage.setItem("checkout:last_customer", JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone.trim(),
-          deliveryLocation: deliveryLocation.trim(),
+          name: normalizedName,
+          email: normalizedEmail,
+          phone: normalizedPhone,
+          deliveryLocation: normalizedDeliveryLocation,
           reference,
           amountPaid,
           amount: amountPaid,
@@ -155,16 +157,19 @@ export default function CheckoutPageClient({ products }: Props) {
         <h2 className="font-semibold text-brand-900">Customer details</h2>
 
         <label htmlFor="fullName" className="mt-3 block text-sm font-semibold">Full name</label>
-        <input id="fullName" value={name} onChange={(event) => setName(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" />
+        <input id="fullName" autoComplete="name" maxLength={80} value={name} onChange={(event) => setName(event.target.value)} aria-invalid={Boolean(name && validationErrors.name)} aria-describedby={name && validationErrors.name ? "fullName-error" : undefined} className="min-h-11 w-full rounded border px-3 py-2" placeholder="First and last name" />
+        {name && validationErrors.name ? <p id="fullName-error" className="mt-1 text-xs text-red-700">{validationErrors.name}</p> : null}
         <label htmlFor="email" className="mt-3 block text-sm font-semibold">Email</label>
-        <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" />
+        <input id="email" type="email" inputMode="email" autoComplete="email" maxLength={180} value={email} onChange={(event) => setEmail(event.target.value)} aria-invalid={Boolean(email && validationErrors.email)} aria-describedby={email && validationErrors.email ? "email-error" : undefined} className="min-h-11 w-full rounded border px-3 py-2" placeholder="name@example.com" />
+        {email && validationErrors.email ? <p id="email-error" className="mt-1 text-xs text-red-700">{validationErrors.email}</p> : null}
         <label htmlFor="phone" className="mt-3 block text-sm font-semibold">Phone</label>
-        <input id="phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" placeholder="+233 20 000 0000" />
-        {phone.trim() && !phoneIsValid ? <p className="mt-1 text-xs text-red-700">Enter a valid phone number, not the delivery location.</p> : null}
+        <input id="phone" type="tel" inputMode="tel" autoComplete="tel" maxLength={20} value={phone} onChange={(event) => setPhone(event.target.value)} aria-invalid={Boolean(phone && validationErrors.phone)} aria-describedby={phone && validationErrors.phone ? "phone-error" : undefined} className="min-h-11 w-full rounded border px-3 py-2" placeholder="024 000 0000" />
+        {phone && validationErrors.phone ? <p id="phone-error" className="mt-1 text-xs text-red-700">{validationErrors.phone}</p> : null}
 
         <h3 className="mt-5 font-semibold text-brand-900">Delivery details</h3>
         <label htmlFor="deliveryLocation" className="mt-3 block text-sm font-semibold">Location / address</label>
-        <input id="deliveryLocation" value={deliveryLocation} onChange={(event) => setDeliveryLocation(event.target.value)} className="min-h-11 w-full rounded border px-3 py-2" placeholder="Town / area / landmark" />
+        <input id="deliveryLocation" autoComplete="street-address" maxLength={300} value={deliveryLocation} onChange={(event) => setDeliveryLocation(event.target.value)} aria-invalid={Boolean(deliveryLocation && validationErrors.deliveryLocation)} aria-describedby={deliveryLocation && validationErrors.deliveryLocation ? "deliveryLocation-error" : undefined} className="min-h-11 w-full rounded border px-3 py-2" placeholder="Town / area / street / landmark" />
+        {deliveryLocation && validationErrors.deliveryLocation ? <p id="deliveryLocation-error" className="mt-1 text-xs text-red-700">{validationErrors.deliveryLocation}</p> : null}
         <label htmlFor="notes" className="mt-3 block text-sm font-semibold">Notes</label>
         <textarea id="notes" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} className="w-full rounded border px-3 py-2" />
 

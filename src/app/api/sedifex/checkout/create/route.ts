@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCatalogData } from "@/lib/catalog";
+import { normalizeCheckoutText, normalizeGhanaPhone, validateCheckoutDetails } from "@/lib/checkout-validation";
 
 const cleanText = (value: unknown, max = 300) => (typeof value === "string" ? value.trim().slice(0, max) : "");
 const cleanQuantity = (value: unknown) => {
@@ -104,18 +105,18 @@ export async function POST(request: Request) {
 
     const customer = (body.customer ?? {}) as Record<string, unknown>;
     const delivery = (body.delivery ?? {}) as Record<string, unknown>;
-    const customerName = cleanText(customer.name, 160);
+    const customerName = normalizeCheckoutText(cleanText(customer.name, 160));
     const customerEmail = cleanText(customer.email, 180).toLowerCase();
-    const customerPhone = cleanText(customer.phone, 80);
-    const deliveryLocation = cleanText(delivery.location, 300);
+    const customerPhone = normalizeGhanaPhone(cleanText(customer.phone, 80));
+    const deliveryLocation = normalizeCheckoutText(cleanText(delivery.location, 300));
     const notes = cleanText(delivery.notes, 1000);
     const requestedItems = readRequestedItems(body);
 
+    const validationErrors = validateCheckoutDetails({ name: customerName, email: customerEmail, phone: customerPhone, deliveryLocation });
+    const firstValidationError = Object.values(validationErrors)[0];
+
     if (requestedItems.length === 0) return NextResponse.json({ ok: false, error: "Cart is empty." }, { status: 400 });
-    if (!customerName) return NextResponse.json({ ok: false, error: "Customer name is required." }, { status: 400 });
-    if (!customerEmail) return NextResponse.json({ ok: false, error: "Customer email is required for online payment." }, { status: 400 });
-    if (!customerPhone) return NextResponse.json({ ok: false, error: "Customer phone is required." }, { status: 400 });
-    if (!deliveryLocation) return NextResponse.json({ ok: false, error: "Delivery location is required." }, { status: 400 });
+    if (firstValidationError) return NextResponse.json({ ok: false, error: firstValidationError, fields: validationErrors }, { status: 400 });
 
     const { products } = await getCatalogData();
     const validatedItems = requestedItems.map((requested) => {
