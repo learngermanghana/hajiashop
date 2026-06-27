@@ -4,6 +4,8 @@ import SectionTitle from "@/components/SectionTitle";
 import { siteConfig } from "@/data/site";
 import { getCatalogData } from "@/lib/catalog";
 
+export const revalidate = 900;
+
 export const metadata: Metadata = {
   title: "Shop Cosmetics, Skincare & Body Wash in Accra",
   description:
