@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { siteConfig } from "@/data/site";
+import { getCachedSedifexPromo, getCachedSedifexPromoGallery } from "@/lib/public-data";
 import { buildWhatsAppLink } from "@/lib/whatsapp";
-import { fetchSedifexPromo, fetchSedifexPromoGallery } from "@/lib/sedifex";
 
 const HERO_BACKGROUND_IMAGE = "/uploads/home/IMG_4435.JPG.jpeg";
 
 export default async function HeroSection() {
-  const [promo, promoGallery] = await Promise.all([fetchSedifexPromo(), fetchSedifexPromoGallery()]);
+  const [promo, promoGallery] = await Promise.all([getCachedSedifexPromo(), getCachedSedifexPromoGallery()]);
   const promoImage = promoGallery[0]?.url ?? HERO_BACKGROUND_IMAGE;
   const promoTitle = promo?.promoTitle?.trim() || promo?.name?.trim() || promo?.displayName?.trim() || "Latest promo";
   const promoSummary = promo?.promoSummary?.trim() || "Follow our latest store promotion and limited-time offers.";

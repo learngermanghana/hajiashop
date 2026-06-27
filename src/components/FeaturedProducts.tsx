@@ -1,12 +1,14 @@
 import Link from "next/link";
 import SectionTitle from "@/components/SectionTitle";
-import { formatCurrency } from "@/lib/helpers";
 import { getCatalogData } from "@/lib/catalog";
-import { fetchSedifexTopSelling } from "@/lib/sedifex";
+import { formatCurrency } from "@/lib/helpers";
+import { getCachedSedifexTopSelling } from "@/lib/public-data";
 
 export default async function FeaturedProducts() {
-  const { products } = await getCatalogData();
-  const topSelling = await fetchSedifexTopSelling(30, 10);
+  const [{ products }, topSelling] = await Promise.all([
+    getCatalogData(),
+    getCachedSedifexTopSelling()
+  ]);
   const topSellingById = new Map(topSelling.map((item) => [item.productId, item]));
   const topSellingByName = new Map(topSelling.map((item) => [item.name.toLowerCase(), item]));
 
