@@ -1,7 +1,7 @@
 import { productCategories as fallbackCategories, products as fallbackProducts } from "@/data/products";
 import type { Product } from "@/data/products";
+import { getCachedSedifexCatalog } from "@/lib/public-data";
 import { categoryDeduplicationKey, normalizeCategory } from "@/lib/productTaxonomy";
-import { fetchSedifexCatalog } from "@/lib/sedifex";
 
 export type CatalogData = {
   categories: string[];
@@ -17,7 +17,7 @@ function categoryList(products: Product[]) {
 
 export async function getCatalogData(): Promise<CatalogData> {
   try {
-    const products = await fetchSedifexCatalog();
+    const products = await getCachedSedifexCatalog();
 
     if (!products.length) {
       return {
