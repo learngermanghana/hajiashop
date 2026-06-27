@@ -1,8 +1,10 @@
 import SectionTitle from "@/components/SectionTitle";
-import { fetchSedifexPromoGallery } from "@/lib/sedifex";
+import { getCachedSedifexPromoGallery } from "@/lib/public-data";
+
+export const revalidate = 900;
 
 export default async function GalleryPage() {
-  const promoGallery = await fetchSedifexPromoGallery();
+  const promoGallery = await getCachedSedifexPromoGallery();
   const resolvedImages = promoGallery.map((item) => item.url);
 
   return (
@@ -15,11 +17,11 @@ export default async function GalleryPage() {
       {resolvedImages.length ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {resolvedImages.map((image) => (
-            <img key={image} src={image} alt="Hajia Slay Shop gallery" className="h-56 w-full rounded-xl object-cover" />
+            <img key={image} src={image} alt="Shop gallery" className="h-56 w-full rounded-xl object-cover" />
           ))}
         </div>
       ) : (
-        <p className="rounded-xl bg-pink-50 p-4 text-sm text-pink-900">No images available from integrationGallery yet.</p>
+        <p className="rounded-xl bg-pink-50 p-4 text-sm text-pink-900">No gallery images are available yet.</p>
       )}
     </section>
   );
