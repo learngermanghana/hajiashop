@@ -6,6 +6,8 @@ import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
 import StoreActivityPopup from "@/components/StoreActivityPopup";
 import { siteConfig } from "@/data/site";
 
+export const revalidate = 900;
+
 export const metadata: Metadata = {
   title: {
     default: "Hajia Slay Shop Accra | Cosmetics, Skincare & Beauty Essentials",
