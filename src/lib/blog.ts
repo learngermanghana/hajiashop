@@ -57,23 +57,29 @@ export async function fetchSedifexBlogPosts(slug?: string): Promise<BlogPost[]> 
     return [];
   }
 
-  const endpoint = new URL(`${normalizeBaseUrl(baseUrl)}/api/public-blog`);
-  endpoint.searchParams.set("storeId", storeId);
+  try {
+    const endpoint = new URL(`${normalizeBaseUrl(baseUrl)}/api/public-blog`);
+    endpoint.searchParams.set("storeId", storeId);
 
-  if (slug) {
-    endpoint.searchParams.set("slug", slug);
+    if (slug) {
+      endpoint.searchParams.set("slug", slug);
+    }
+
+    const response = await fetch(endpoint.toString(), {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 900 }
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = (await response.json()) as BlogPayload;
+    return toBlogPosts(payload);
+  } catch (error) {
+    console.error("Blog pull failed", error);
+    return [];
   }
-
-  const response = await fetch(endpoint.toString(), {
-    next: { revalidate: 60 }
-  });
-
-  if (!response.ok) {
-    throw new Error(`Blog pull failed: ${response.status}`);
-  }
-
-  const payload = (await response.json()) as BlogPayload;
-  return toBlogPosts(payload);
 }
 
 export function getBlogExcerpt(content: string, maxLength = 140) {
