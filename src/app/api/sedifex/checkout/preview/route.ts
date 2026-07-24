@@ -1,7 +1,19 @@
 import { NextResponse } from "next/server";
+import { getMutationTimeoutMs } from "@/lib/cache-config";
 
 function normalizeBaseUrl(baseUrl: string) {
   return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+}
+
+async function fetchWithMutationTimeout(url: string, init: RequestInit) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), getMutationTimeoutMs());
+
+  try {
+    return await fetch(url, { ...init, cache: "no-store", signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function POST(request: Request) {
@@ -15,7 +27,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Sedifex preview is not configured." }, { status: 500 });
     }
 
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/checkout/preview`, {
+    const response = await fetchWithMutationTimeout(`${normalizeBaseUrl(baseUrl)}/checkout/preview`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,

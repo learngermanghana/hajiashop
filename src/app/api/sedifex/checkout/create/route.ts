@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getMutationTimeoutMs } from "@/lib/cache-config";
 import { getCatalogData } from "@/lib/catalog";
 import { normalizeCheckoutText, normalizeGhanaPhone, validateCheckoutDetails } from "@/lib/checkout-validation";
 
@@ -56,7 +57,7 @@ async function createStoreAwareCheckoutSession(payload: Record<string, unknown>,
   const endpointUrl = resolveCheckoutCreateUrl(baseUrl);
   endpointUrl.searchParams.set("storeId", storeId);
 
-  const response = await fetch(endpointUrl.toString(), {
+  const response = await fetchWithMutationTimeout(endpointUrl.toString(), {
     method: "POST",
     headers: {
       ["Author" + "ization"]: `Bearer ${apiKey}`,
@@ -96,6 +97,17 @@ const readRequestedItems = (body: Record<string, unknown>): Array<{ id: string; 
 
   return fromList;
 };
+
+async function fetchWithMutationTimeout(url: string, init: RequestInit) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), getMutationTimeoutMs());
+
+  try {
+    return await fetch(url, { ...init, cache: "no-store", signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 export async function POST(request: Request) {
   try {

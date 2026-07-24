@@ -1,4 +1,6 @@
 import type { Product } from "@/data/products";
+import { unstable_cache } from "next/cache";
+import { getPublicCacheSeconds } from "@/lib/cache-config";
 import { normalizeCategory } from "@/lib/productTaxonomy";
 
 type SedifexRecord = Record<string, unknown>;
@@ -52,7 +54,7 @@ export type SedifexContactLinks = {
   social: { instagram?: string; facebook?: string; tiktok?: string; youtube?: string; x?: string; linkedin?: string };
 };
 
-const DEFAULT_TIMEOUT_MS = 10_000;
+const DEFAULT_TIMEOUT_MS = 5_000;
 
 function normalizeBaseUrl(baseUrl: string) {
   return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
@@ -164,7 +166,7 @@ function collectProductImages(data: SedifexRecord): string[] {
 async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  const revalidateSeconds = toNumber(process.env.SEDIFEX_REVALIDATE_SECONDS) ?? 60;
+  const revalidateSeconds = toNumber(process.env.SEDIFEX_REVALIDATE_SECONDS) ?? getPublicCacheSeconds();
 
   try {
     return await fetch(url, {
@@ -621,7 +623,7 @@ function toPromoGallery(payload: unknown): SedifexPromoGalleryItem[] {
     .sort((a, b) => (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER));
 }
 
-export async function fetchSedifexCatalog(): Promise<Product[]> {
+async function fetchSedifexCatalogUncached(): Promise<Product[]> {
   const integrationEnabled = Boolean(getSedifexIntegrationApiBaseUrl() && process.env.SEDIFEX_STORE_ID);
 
   if (integrationEnabled) {
@@ -647,7 +649,7 @@ export async function fetchSedifexCatalog(): Promise<Product[]> {
   return toProducts(productsPayload, promotions);
 }
 
-export async function fetchSedifexPromo(): Promise<SedifexPromoProfile | null> {
+async function fetchSedifexPromoUncached(): Promise<SedifexPromoProfile | null> {
   try {
     const payload = await fetchSedifexIntegrationResource("/integrationPromo");
     return toPromoProfile(payload);
@@ -656,7 +658,7 @@ export async function fetchSedifexPromo(): Promise<SedifexPromoProfile | null> {
   }
 }
 
-export async function fetchSedifexPromoGallery(): Promise<SedifexPromoGalleryItem[]> {
+async function fetchSedifexPromoGalleryUncached(): Promise<SedifexPromoGalleryItem[]> {
   try {
     const payload = await fetchSedifexIntegrationResource("/integrationGallery");
     return toPromoGallery(payload).filter((item) => item.isPublished !== false);
@@ -665,7 +667,7 @@ export async function fetchSedifexPromoGallery(): Promise<SedifexPromoGalleryIte
   }
 }
 
-export async function fetchSedifexTopSelling(days = 30, limit = 10): Promise<SedifexTopSellingProduct[]> {
+async function fetchSedifexTopSellingUncached(days = 30, limit = 10): Promise<SedifexTopSellingProduct[]> {
   try {
     const safeDays = Math.min(Math.max(Math.floor(days), 1), 365);
     const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 50);
@@ -675,3 +677,24 @@ export async function fetchSedifexTopSelling(days = 30, limit = 10): Promise<Sed
     return [];
   }
 }
+
+
+export const fetchSedifexCatalog = unstable_cache(fetchSedifexCatalogUncached, ["sedifex-catalog"], {
+  revalidate: getPublicCacheSeconds(),
+  tags: ["sedifex-catalog"]
+});
+
+export const fetchSedifexPromo = unstable_cache(fetchSedifexPromoUncached, ["sedifex-promo"], {
+  revalidate: getPublicCacheSeconds(),
+  tags: ["sedifex-promo"]
+});
+
+export const fetchSedifexPromoGallery = unstable_cache(fetchSedifexPromoGalleryUncached, ["sedifex-promo-gallery"], {
+  revalidate: getPublicCacheSeconds(),
+  tags: ["sedifex-promo-gallery"]
+});
+
+export const fetchSedifexTopSelling = unstable_cache(fetchSedifexTopSellingUncached, ["sedifex-top-selling"], {
+  revalidate: getPublicCacheSeconds(),
+  tags: ["sedifex-top-selling"]
+});
