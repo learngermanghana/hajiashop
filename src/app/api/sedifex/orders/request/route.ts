@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getMutationTimeoutMs } from "@/lib/cache-config";
 import { getCatalogData } from "@/lib/catalog";
 
 const cleanText = (value: unknown, max = 300) => (typeof value === "string" ? value.trim().slice(0, max) : "");
@@ -32,7 +33,7 @@ async function sendSedifexOrder(payload: Record<string, unknown>) {
     throw new Error("Sedifex integration is not configured. Missing SEDIFEX_API_BASE_URL or SEDIFEX_INTEGRATION_KEY.");
   }
 
-  const response = await fetch(`${normalizeBaseUrl(baseUrl)}/integration/orders/request`, {
+  const response = await fetchWithMutationTimeout(`${normalizeBaseUrl(baseUrl)}/integration/orders/request`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -50,6 +51,17 @@ async function sendSedifexOrder(payload: Record<string, unknown>) {
     throw new Error(data?.error ?? `Sedifex order request failed (${response.status})`);
   }
   return data;
+}
+
+async function fetchWithMutationTimeout(url: string, init: RequestInit) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), getMutationTimeoutMs());
+
+  try {
+    return await fetch(url, { ...init, cache: "no-store", signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function POST(request: Request) {

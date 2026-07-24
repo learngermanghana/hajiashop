@@ -26,6 +26,8 @@ export const metadata: Metadata = {
   }
 };
 
+export const revalidate = 3600;
+
 export default async function HomePage() {
   const posts = await fetchSedifexBlogPosts();
   const latestUpdates = posts.slice(0, 4);

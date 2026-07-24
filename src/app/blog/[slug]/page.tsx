@@ -3,6 +3,13 @@ import { fetchSedifexBlogPosts, formatBlogContent } from "@/lib/blog";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const posts = await fetchSedifexBlogPosts();
+  return posts.map((post) => ({ slug: post.slug }));
+}
+
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
   const posts = await fetchSedifexBlogPosts(slug);

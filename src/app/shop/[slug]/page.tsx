@@ -48,6 +48,13 @@ export async function generateMetadata({ params }: ProductPageParams): Promise<M
   };
 }
 
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const { products } = await getCatalogData();
+  return products.map((product) => ({ slug: product.slug }));
+}
+
 export default async function ProductDetailPage({ params }: ProductPageParams) {
   const { products } = await getCatalogData();
   const { slug } = await params;

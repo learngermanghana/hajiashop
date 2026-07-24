@@ -2,6 +2,8 @@ import BlogCards from "@/components/blog/BlogCards";
 import SectionTitle from "@/components/SectionTitle";
 import { fetchSedifexBlogPosts } from "@/lib/blog";
 
+export const revalidate = 3600;
+
 export default async function BlogPage() {
   const posts = await fetchSedifexBlogPosts();
 

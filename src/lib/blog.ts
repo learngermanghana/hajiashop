@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+import { getPublicCacheSeconds } from "@/lib/cache-config";
 export type BlogPost = {
   id: string;
   title: string;
@@ -49,7 +51,7 @@ function toBlogPosts(payload: BlogPayload): BlogPost[] {
   });
 }
 
-export async function fetchSedifexBlogPosts(slug?: string): Promise<BlogPost[]> {
+async function fetchSedifexBlogPostsUncached(slug?: string): Promise<BlogPost[]> {
   const baseUrl = process.env.SEDIFEX_SITE_BASE_URL ?? "https://www.sedifex.com";
   const storeId = process.env.SEDIFEX_STORE_ID ?? "";
 
@@ -65,7 +67,7 @@ export async function fetchSedifexBlogPosts(slug?: string): Promise<BlogPost[]> 
   }
 
   const response = await fetch(endpoint.toString(), {
-    next: { revalidate: 60 }
+    next: { revalidate: getPublicCacheSeconds() }
   });
 
   if (!response.ok) {
@@ -116,3 +118,9 @@ export function formatBlogContent(content: string) {
 
   return rendered.join("");
 }
+
+
+export const fetchSedifexBlogPosts = unstable_cache(fetchSedifexBlogPostsUncached, ["sedifex-blog-posts"], {
+  revalidate: getPublicCacheSeconds(),
+  tags: ["sedifex-blog-posts"]
+});
