@@ -1,7 +1,7 @@
 import SectionTitle from "@/components/SectionTitle";
 import { fetchSedifexPromoGallery } from "@/lib/sedifex";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export default async function GalleryPage() {
   const promoGallery = await fetchSedifexPromoGallery();
