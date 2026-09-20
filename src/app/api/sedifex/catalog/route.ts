@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getPublicCacheControlHeader } from "@/lib/cache-config";
 import { getCatalogData } from "@/lib/catalog";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export async function GET() {
   const catalog = await getCatalogData();

@@ -1,5 +1,5 @@
-export const DEFAULT_PUBLIC_CACHE_SECONDS = 60 * 60;
-export const DEFAULT_PUBLIC_STALE_SECONDS = 60 * 60 * 24;
+export const DEFAULT_PUBLIC_CACHE_SECONDS = 60 * 60 * 24;
+export const DEFAULT_PUBLIC_STALE_SECONDS = 60 * 60 * 24 * 7;
 export const DEFAULT_MUTATION_TIMEOUT_MS = 10_000;
 
 function toPositiveInteger(value: string | undefined, fallback: number) {
