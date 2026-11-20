@@ -7,7 +7,7 @@ import { getCatalogData } from "@/lib/catalog";
 export const metadata: Metadata = {
   title: "Shop Cosmetics, Skincare & Body Wash in Accra",
   description:
-    "Browse Hajia Slay Shop products in Accra: skincare, body wash, glow products, makeup and premium beauty essentials. Verified on Sedifex Market with secure checkout.",
+    "Browse Hajia Slay Shop products in Accra: skincare, body wash, glow products, makeup and premium beauty essentials. Contact the store on WhatsApp to confirm orders.",
   alternates: {
     canonical: `${siteConfig.baseUrl}/shop`
   },
@@ -30,7 +30,7 @@ export default async function ShopPage() {
       <SectionTitle
         eyebrow="Shop Accra beauty essentials"
         title="Find your perfect cosmetics, skincare and body care products"
-        description="Search trusted Hajia Slay Shop products by name, type and category. Verified on Sedifex Market with secure online checkout."
+        description="Search trusted Hajia Slay Shop products by name, type and category. Message the store on WhatsApp to order."
       />
       <ProductGrid products={products} categories={categories} />
     </section>
