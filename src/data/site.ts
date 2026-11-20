@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "Hajia Slay Shop",
   seoName: "Hajia Slay Shop Accra",
   description:
-    "Hajia Slay Shop is a trusted cosmetics and beauty essentials shop in Accra, Ghana, offering skincare, body wash, glow products, makeup and premium beauty items with secure online checkout.",
+    "Hajia Slay Shop is a trusted cosmetics and beauty essentials shop in Accra, Ghana, offering skincare, body wash, glow products, makeup and premium beauty items with WhatsApp ordering and personal assistance.",
   shortDescription:
     "Trusted cosmetics and beauty essentials shop in Accra, verified on Sedifex Market.",
   phone: "053 795 9673",

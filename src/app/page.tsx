@@ -13,7 +13,7 @@ import { fetchSedifexBlogPosts } from "@/lib/blog";
 export const metadata: Metadata = {
   title: "Best Cosmetics & Beauty Shop in Accra",
   description:
-    "Shop skincare, body wash, makeup and premium beauty essentials from Hajia Slay Shop in Accra. Verified on Sedifex Market with secure Paystack checkout.",
+    "Shop skincare, body wash, makeup and premium beauty essentials from Hajia Slay Shop in Accra. Enquire about products and delivery directly on WhatsApp.",
   alternates: {
     canonical: siteConfig.baseUrl
   },
@@ -49,7 +49,7 @@ export default async function HomePage() {
     },
     sameAs: [siteConfig.sedifexMarketUrl, siteConfig.tiktok],
     knowsAbout: ["Cosmetics", "Skincare", "Body wash", "Beauty essentials", "Makeup"],
-    paymentAccepted: "Paystack online payment, mobile money, card payment"
+    paymentAccepted: "Confirm payment methods directly with the store"
   };
 
   return (
@@ -82,7 +82,7 @@ export default async function HomePage() {
             ✅ Verified on <a href={siteConfig.sedifexMarketUrl} target="_blank" rel="noreferrer" className="font-semibold text-brand-700 underline">Sedifex Market</a>.
           </li>
           <li>🚚 Delivery support for Accra customers and nearby areas.</li>
-          <li>💳 Secure online payment through Paystack.</li>
+          <li>💬 Order by WhatsApp; confirm pricing and delivery with the store.</li>
         </ul>
       </section>
       <section className="container-shell py-16">

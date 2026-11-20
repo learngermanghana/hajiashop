@@ -120,7 +120,5 @@ export function formatBlogContent(content: string) {
 }
 
 
-export const fetchSedifexBlogPosts = unstable_cache(fetchSedifexBlogPostsUncached, ["sedifex-blog-posts"], {
-  revalidate: getPublicCacheSeconds(),
-  tags: ["sedifex-blog-posts"]
-});
+// External blog syncing suspended for static hosting.
+export async function fetchSedifexBlogPosts(_slug?: string): Promise<BlogPost[]> { return []; }

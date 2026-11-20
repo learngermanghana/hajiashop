@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: ProductPageParams): Promise<M
 
   const productUrl = `${siteConfig.baseUrl}/shop/${product.slug}`;
   const title = `${product.name} in Accra`;
-  const description = `${product.shortDescription || product.description} Buy ${product.name} from Hajia Slay Shop Accra, verified on Sedifex Market with secure online checkout.`.slice(0, 220);
+  const description = `${product.shortDescription || product.description} Buy ${product.name} from Hajia Slay Shop Accra, enquire and confirm availability by WhatsApp.`.slice(0, 220);
 
   return {
     title,

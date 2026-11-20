@@ -15,7 +15,7 @@ const highlights = [
   {
     title: "Fast support & delivery",
     description:
-      "From checkout questions to order updates, our team responds quickly and works hard to get your order to you on time.",
+      "From WhatsApp enquiries to order updates, our team responds quickly and works hard to get your order to you on time.",
   },
 ];
 

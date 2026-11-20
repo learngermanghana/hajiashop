@@ -57,8 +57,8 @@ export default async function Footer() {
                 </a>
                 .
               </li>
-              <li>🚚 24-hour delivery when you order before 4:00 PM.</li>
-              <li>💳 Mobile money, credit cards, and pay on delivery are all accepted.</li>
+              <li>🚚 Ask about delivery availability and timing before ordering.</li>
+              <li>💬 Confirm accepted payment methods with the store on WhatsApp.</li>
             </ul>
           </div>
         </div>
