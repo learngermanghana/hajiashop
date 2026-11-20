@@ -3,7 +3,6 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloatingButton from "@/components/WhatsAppFloatingButton";
-import StoreActivityPopup from "@/components/StoreActivityPopup";
 import { siteConfig } from "@/data/site";
 
 export const metadata: Metadata = {
@@ -54,7 +53,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main>{children}</main>
         <Footer />
-        <StoreActivityPopup />
         <WhatsAppFloatingButton />
       </body>
     </html>

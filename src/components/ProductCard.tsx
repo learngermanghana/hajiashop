@@ -20,7 +20,7 @@ export default function ProductCard({ product }: { product: Product }) {
           href={`/shop/${product.slug}`}
           className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-brand-600 px-4 py-3 text-sm font-semibold text-white"
         >
-          {product.inStock ? "Order product" : "View product"}
+          {product.inStock ? "View & enquire" : "View product"}
         </Link>
       </div>
     </article>
