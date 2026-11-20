@@ -679,22 +679,8 @@ async function fetchSedifexTopSellingUncached(days = 30, limit = 10): Promise<Se
 }
 
 
-export const fetchSedifexCatalog = unstable_cache(fetchSedifexCatalogUncached, ["sedifex-catalog"], {
-  revalidate: getPublicCacheSeconds(),
-  tags: ["sedifex-catalog"]
-});
-
-export const fetchSedifexPromo = unstable_cache(fetchSedifexPromoUncached, ["sedifex-promo"], {
-  revalidate: getPublicCacheSeconds(),
-  tags: ["sedifex-promo"]
-});
-
-export const fetchSedifexPromoGallery = unstable_cache(fetchSedifexPromoGalleryUncached, ["sedifex-promo-gallery"], {
-  revalidate: getPublicCacheSeconds(),
-  tags: ["sedifex-promo-gallery"]
-});
-
-export const fetchSedifexTopSelling = unstable_cache(fetchSedifexTopSellingUncached, ["sedifex-top-selling"], {
-  revalidate: getPublicCacheSeconds(),
-  tags: ["sedifex-top-selling"]
-});
+// Public integrations are paused while the site operates as a static WhatsApp-only brochure.
+export const fetchSedifexCatalog = async (): Promise<Product[]> => [];
+export const fetchSedifexPromo = async (): Promise<SedifexPromoProfile | null> => null;
+export const fetchSedifexPromoGallery = async (): Promise<SedifexPromoGalleryItem[]> => [];
+export const fetchSedifexTopSelling = async (_days = 30, _limit = 10): Promise<SedifexTopSellingProduct[]> => [];
